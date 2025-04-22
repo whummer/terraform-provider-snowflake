@@ -1,3 +1,5 @@
+//go:build !account_level_tests
+
 package testint
 
 import (
@@ -387,7 +389,7 @@ func TestInt_FileFormatsAlter(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = client.FileFormats.ShowByID(ctx, oldId)
-		require.ErrorIs(t, err, sdk.ErrObjectNotExistOrAuthorized)
+		require.ErrorIs(t, err, sdk.ErrObjectNotFound)
 
 		result, err := client.FileFormats.ShowByID(ctx, newId)
 		require.NoError(t, err)
@@ -441,7 +443,7 @@ func TestInt_FileFormatsDrop(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = client.FileFormats.ShowByID(ctx, fileFormat.ID())
-		require.ErrorIs(t, err, sdk.ErrObjectNotExistOrAuthorized)
+		require.ErrorIs(t, err, sdk.ErrObjectNotFound)
 	})
 
 	t.Run("with IfExists", func(t *testing.T) {
@@ -454,7 +456,7 @@ func TestInt_FileFormatsDrop(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = client.FileFormats.ShowByID(ctx, fileFormat.ID())
-		require.ErrorIs(t, err, sdk.ErrObjectNotExistOrAuthorized)
+		require.ErrorIs(t, err, sdk.ErrObjectNotFound)
 	})
 }
 

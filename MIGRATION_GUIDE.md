@@ -12,6 +12,77 @@ across different versions.
 > [!TIP]
 > If you're still using the `Snowflake-Labs/snowflake` source, see [Upgrading from Snowflake-Labs Provider](./SNOWFLAKEDB_MIGRATION.md) to upgrade to the snowflakedb namespace.
 
+## v1.1.0 ➞ v1.2.0
+
+### New behavior for Read and Delete operations when removing high-hierarchy objects
+Some objects in Snowflake are created in hierarchy, for example, tables (database → schema → table).
+When the user wants to remove the higher-hierarchy object (like a database), the lower-hierarchy objects should be removed beforehand. 
+Otherwise, Terraform would fail to remove the lower-hierarchy objects from the state, 
+and without manual state management it wouldn't be possible to remove this object, ending up in broken state (reference issue: [#1243](https://github.com/snowflakedb/terraform-provider-snowflake/issues/1243)).
+This may only happen in particular cases, for example, if part of the hierarchy is managed outside Terraform or the configuration is missing dependencies between resources.
+This behavior was described more in detail in [our documentation](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/guides/object_renaming_research_summary#renaming-higher-hierarchy-objects).
+
+For improved usability, we adjusted the Read and Delete operation implementations for all resources, 
+so that now, they're able to know the higher-hierarchy object is missing, and they can safely remove themselves from the state.
+
+To demonstrate this behavior, let's take the following configuration:
+```terraform
+resource "snowflake_table" "test" {
+  database = "TEST_DATABASE"
+  schema   = "PUBLIC"
+  name     = "TEMP_TABLE"
+  column {
+    name = "ID"
+    type = "NUMBER"
+  }
+}
+```
+> Note: The `TEST_DATABASE` is created manually through Snowflake and the table configuration is already applied through Terraform.
+ 
+When you remove the database by running `DROP DATABASE TEST_DATABASE` in Snowflake, and then run `terraform apply`,
+previously, you would end up in the infinite loop of errors and only manual removal from state (`terraform state rm snowflake_table.test`)
+would help you to remove the table from the state (and then from the configuration). 
+
+In the future, we are planning to do the same with object attachments, like grants, policies, etc. (To address cases like: [#3412](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3412))
+
+### New TOML file schema
+The TOML file schema before v1.2.0 was not consistent with the configuration keys in the provider. The main differences were:
+- The keys in the provider contain an underscore (`_`) as a separator, but the TOML schema has fields without any separator.
+- The field `driver_tracing` in the provider is related to `tracing` in the TOML schema.
+
+These differences caused some confusion for the users. This is why we decided to introduce a new TOML schema addressing these flaws.
+The new schema uses underscore (`_`) as a separator, and changes `tracing` to `driver_tracing` to be consistent with the provider schema.
+You can see an example in [our registry](https://registry.terraform.io/providers/snowflakedb/snowflake/1.2.0/docs#order-precedence).
+
+The default behavior is the same as before v1.2.0. You can enable the new behavior by setting `use_legacy_toml_file = false` in the provider, or by setting `SNOWFLAKE_USE_LEGACY_TOML_FILE=false` environmental variable.
+Please note that we will change the default behavior in v2: the new TOML schema will be read by default, but there will still be a possibility to read the old format. However, we encourage you to use our new schema now and give us feedback.
+
+NOTE: With this change, we are not bringing back the `account` field yet. This means that `account_name` and `organization_name` fields must still be used. We will discuss about this field after v2.
+
+References: [#3553](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3553)
+
+### Fixes in handling references to computed fields in context of `show_output`
+The issue could arise in almost any object using show_output when the following steps happen:
+1. Object is created.
+2. Object's attribute is updated to computed value of other object added in this run.
+
+In such situation the final plan could result in error like this one:
+```
+| Error: Provider produced inconsistent final plan
+|
+| When expanding the plan for snowflake_legacy_service_user.one to include new
+| values learned so far during apply, provider
+| "registry.terraform.io/hashicorp/snowflake" produced an invalid new value for
+| .show_output: was known, but now unknown.
+|
+| This is a bug in the provider, which should be reported in the provider's own
+| issue tracker.
+```
+
+This version fixes this behavior. No action should be required on user side.
+
+References: [#3522](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3522)
+
 ## v1.0.5 ➞ v1.1.0
 
 ### Timeouts in resources

@@ -64,7 +64,10 @@ func init() {
 	}
 
 	TestAccProvider = provider.Provider()
+	// TODO [SNOW-2054208]: improve during the package extraction
 	TestAccProvider.ResourcesMap["snowflake_object_renaming"] = resources.ObjectRenamingListsAndSets()
+	TestAccProvider.ResourcesMap["snowflake_test_resource_data_type_diff_handling"] = resources.TestResourceDataTypeDiffHandling()
+	TestAccProvider.ResourcesMap["snowflake_test_resource_data_type_diff_handling_list"] = resources.TestResourceDataTypeDiffHandlingList()
 	TestAccProvider.ConfigureContextFunc = ConfigureProviderWithConfigCache
 
 	v5Server = TestAccProvider.GRPCProvider()
@@ -80,7 +83,7 @@ func init() {
 	}
 	_ = testAccProtoV6ProviderFactoriesNew
 
-	defaultConfig, err := sdk.ProfileConfig(testprofiles.Default, true)
+	defaultConfig, err := sdk.ProfileConfig(testprofiles.Default, sdk.WithVerifyPermissions(true))
 	if err != nil {
 		log.Panicf("Could not read configuration from profile: %v", err)
 	}
@@ -95,7 +98,7 @@ func init() {
 	}
 	atc.client = client
 
-	cfg, err := sdk.ProfileConfig(testprofiles.Secondary, true)
+	cfg, err := sdk.ProfileConfig(testprofiles.Secondary, sdk.WithVerifyPermissions(true))
 	if err != nil {
 		log.Panicf("Config for the secondary client is needed to run acceptance tests, err: %v", err)
 	}

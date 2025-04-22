@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/internal/collections"
+
 	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/internal/util"
 )
 
@@ -25,8 +27,10 @@ type Warehouses interface {
 	Create(ctx context.Context, id AccountObjectIdentifier, opts *CreateWarehouseOptions) error
 	Alter(ctx context.Context, id AccountObjectIdentifier, opts *AlterWarehouseOptions) error
 	Drop(ctx context.Context, id AccountObjectIdentifier, opts *DropWarehouseOptions) error
+	DropSafely(ctx context.Context, id AccountObjectIdentifier) error
 	Show(ctx context.Context, opts *ShowWarehouseOptions) ([]Warehouse, error)
 	ShowByID(ctx context.Context, id AccountObjectIdentifier) (*Warehouse, error)
+	ShowByIDSafely(ctx context.Context, id AccountObjectIdentifier) (*Warehouse, error)
 	Describe(ctx context.Context, id AccountObjectIdentifier) (*WarehouseDetails, error)
 	ShowParameters(ctx context.Context, id AccountObjectIdentifier) ([]*Parameter, error)
 }
@@ -394,6 +398,10 @@ func (c *warehouses) Drop(ctx context.Context, id AccountObjectIdentifier, opts 
 	return err
 }
 
+func (c *warehouses) DropSafely(ctx context.Context, id AccountObjectIdentifier) error {
+	return SafeDrop(c.client, func() error { return c.Drop(ctx, id, &DropWarehouseOptions{IfExists: Bool(true)}) }, ctx, id)
+}
+
 // ShowWarehouseOptions is based on https://docs.snowflake.com/en/sql-reference/sql/show-warehouses.
 type ShowWarehouseOptions struct {
 	show       bool  `ddl:"static" sql:"SHOW"`
@@ -554,12 +562,13 @@ func (c *warehouses) ShowByID(ctx context.Context, id AccountObjectIdentifier) (
 		return nil, err
 	}
 
-	for _, warehouse := range warehouses {
-		if warehouse.ID().name == id.Name() {
-			return &warehouse, nil
-		}
-	}
-	return nil, ErrObjectNotExistOrAuthorized
+	return collections.FindFirst(warehouses, func(warehouse Warehouse) bool {
+		return warehouse.ID().FullyQualifiedName() == id.FullyQualifiedName()
+	})
+}
+
+func (c *warehouses) ShowByIDSafely(ctx context.Context, id AccountObjectIdentifier) (*Warehouse, error) {
+	return SafeShowById(c.client, c.ShowByID, ctx, id)
 }
 
 // describeWarehouseOptions is based on https://docs.snowflake.com/en/sql-reference/sql/desc-warehouse.

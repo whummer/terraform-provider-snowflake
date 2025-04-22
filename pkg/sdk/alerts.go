@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/internal/collections"
 )
 
 // Compile-time proof of interface implementation.
@@ -22,8 +24,10 @@ type Alerts interface {
 	Create(ctx context.Context, id SchemaObjectIdentifier, warehouse AccountObjectIdentifier, schedule string, condition string, action string, opts *CreateAlertOptions) error
 	Alter(ctx context.Context, id SchemaObjectIdentifier, opts *AlterAlertOptions) error
 	Drop(ctx context.Context, id SchemaObjectIdentifier, opts *DropAlertOptions) error
+	DropSafely(ctx context.Context, id SchemaObjectIdentifier) error
 	Show(ctx context.Context, opts *ShowAlertOptions) ([]Alert, error)
 	ShowByID(ctx context.Context, id SchemaObjectIdentifier) (*Alert, error)
+	ShowByIDSafely(ctx context.Context, id SchemaObjectIdentifier) (*Alert, error)
 	Describe(ctx context.Context, id SchemaObjectIdentifier) (*AlertDetails, error)
 }
 
@@ -197,6 +201,10 @@ func (v *alerts) Drop(ctx context.Context, id SchemaObjectIdentifier, opts *Drop
 	return err
 }
 
+func (v *alerts) DropSafely(ctx context.Context, id SchemaObjectIdentifier) error {
+	return SafeDrop(v.client, func() error { return v.Drop(ctx, id, &DropAlertOptions{IfExists: Bool(true)}) }, ctx, id)
+}
+
 // ShowAlertOptions is based on https://docs.snowflake.com/en/sql-reference/sql/show-alerts.
 type ShowAlertOptions struct {
 	show   bool  `ddl:"static" sql:"SHOW"`
@@ -299,12 +307,13 @@ func (v *alerts) ShowByID(ctx context.Context, id SchemaObjectIdentifier) (*Aler
 		return nil, err
 	}
 
-	for _, alert := range alerts {
-		if alert.ID().name == id.Name() {
-			return &alert, nil
-		}
-	}
-	return nil, ErrObjectNotExistOrAuthorized
+	return collections.FindFirst(alerts, func(alert Alert) bool {
+		return alert.ID().FullyQualifiedName() == id.FullyQualifiedName()
+	})
+}
+
+func (v *alerts) ShowByIDSafely(ctx context.Context, id SchemaObjectIdentifier) (*Alert, error) {
+	return SafeShowById(v.client, v.ShowByID, ctx, id)
 }
 
 // describeAlertOptions is based on https://docs.snowflake.com/en/sql-reference/sql/desc-alert.

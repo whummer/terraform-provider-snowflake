@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/internal/collections"
 )
 
 var (
@@ -23,8 +24,10 @@ type FileFormats interface {
 	Create(ctx context.Context, id SchemaObjectIdentifier, opts *CreateFileFormatOptions) error
 	Alter(ctx context.Context, id SchemaObjectIdentifier, opts *AlterFileFormatOptions) error
 	Drop(ctx context.Context, id SchemaObjectIdentifier, opts *DropFileFormatOptions) error
+	DropSafely(ctx context.Context, id SchemaObjectIdentifier) error
 	Show(ctx context.Context, opts *ShowFileFormatsOptions) ([]FileFormat, error)
 	ShowByID(ctx context.Context, id SchemaObjectIdentifier) (*FileFormat, error)
+	ShowByIDSafely(ctx context.Context, id SchemaObjectIdentifier) (*FileFormat, error)
 	Describe(ctx context.Context, id SchemaObjectIdentifier) (*FileFormatDetails, error)
 }
 
@@ -623,6 +626,10 @@ func (v *fileFormats) Drop(ctx context.Context, id SchemaObjectIdentifier, opts 
 	return err
 }
 
+func (v *fileFormats) DropSafely(ctx context.Context, id SchemaObjectIdentifier) error {
+	return SafeDrop(v.client, func() error { return v.Drop(ctx, id, &DropFileFormatOptions{IfExists: Bool(true)}) }, ctx, id)
+}
+
 // ShowFileFormatsOptions is based on https://docs.snowflake.com/en/sql-reference/sql/show-file-formats.
 type ShowFileFormatsOptions struct {
 	show        bool  `ddl:"static" sql:"SHOW"`
@@ -657,12 +664,13 @@ func (v *fileFormats) ShowByID(ctx context.Context, id SchemaObjectIdentifier) (
 	if err != nil {
 		return nil, err
 	}
-	for _, f := range fileFormats {
-		if reflect.DeepEqual(f.ID(), id) {
-			return &f, nil
-		}
-	}
-	return nil, ErrObjectNotExistOrAuthorized
+	return collections.FindFirst(fileFormats, func(format FileFormat) bool {
+		return format.ID().FullyQualifiedName() == id.FullyQualifiedName()
+	})
+}
+
+func (v *fileFormats) ShowByIDSafely(ctx context.Context, id SchemaObjectIdentifier) (*FileFormat, error) {
+	return SafeShowById(v.client, v.ShowByID, ctx, id)
 }
 
 type FileFormatDetails struct {

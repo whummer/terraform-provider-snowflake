@@ -43,6 +43,10 @@ func (c *IdsGenerator) RandomAccountObjectIdentifier() sdk.AccountObjectIdentifi
 	return sdk.NewAccountObjectIdentifier(c.Alpha())
 }
 
+func (c *IdsGenerator) RandomSensitiveAccountObjectIdentifier() sdk.AccountObjectIdentifier {
+	return c.RandomAccountObjectIdentifierWithPrefix(random.SensitiveAlphanumeric())
+}
+
 func (c *IdsGenerator) RandomAccountObjectIdentifierWithPrefix(prefix string) sdk.AccountObjectIdentifier {
 	return sdk.NewAccountObjectIdentifier(c.AlphaWithPrefix(prefix))
 }
@@ -134,17 +138,17 @@ func (c *IdsGenerator) Alpha() string {
 }
 
 func (c *IdsGenerator) AlphaN(n int) string {
-	return c.withTestObjectSuffix(strings.ToUpper(random.AlphaN(n)))
+	return c.WithTestObjectSuffix(strings.ToUpper(random.AlphaN(n)))
 }
 
 func (c *IdsGenerator) AlphaContaining(part string) string {
-	return c.withTestObjectSuffix(c.Alpha() + part)
+	return c.WithTestObjectSuffix(c.Alpha() + part)
 }
 
 func (c *IdsGenerator) AlphaWithPrefix(prefix string) string {
 	return prefix + c.Alpha()
 }
 
-func (c *IdsGenerator) withTestObjectSuffix(text string) string {
+func (c *IdsGenerator) WithTestObjectSuffix(text string) string {
 	return text + c.context.testObjectSuffix
 }

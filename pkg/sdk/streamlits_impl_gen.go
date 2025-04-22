@@ -27,6 +27,10 @@ func (v *streamlits) Drop(ctx context.Context, request *DropStreamlitRequest) er
 	return validateAndExec(v.client, ctx, opts)
 }
 
+func (v *streamlits) DropSafely(ctx context.Context, id SchemaObjectIdentifier) error {
+	return SafeDrop(v.client, func() error { return v.Drop(ctx, NewDropStreamlitRequest(id).WithIfExists(true)) }, ctx, id)
+}
+
 func (v *streamlits) Show(ctx context.Context, request *ShowStreamlitRequest) ([]Streamlit, error) {
 	opts := request.toOpts()
 	dbRows, err := validateAndQuery[streamlitsRow](v.client, ctx, opts)
@@ -46,6 +50,10 @@ func (v *streamlits) ShowByID(ctx context.Context, id SchemaObjectIdentifier) (*
 		return nil, err
 	}
 	return collections.FindFirst(streamlits, func(r Streamlit) bool { return r.Name == id.Name() })
+}
+
+func (v *streamlits) ShowByIDSafely(ctx context.Context, id SchemaObjectIdentifier) (*Streamlit, error) {
+	return SafeShowById(v.client, v.ShowByID, ctx, id)
 }
 
 func (v *streamlits) Describe(ctx context.Context, id SchemaObjectIdentifier) (*StreamlitDetail, error) {

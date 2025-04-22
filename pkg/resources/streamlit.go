@@ -104,13 +104,20 @@ var streamlitSchema = map[string]*schema.Schema{
 }
 
 func Streamlit() *schema.Resource {
+	deleteFunc := ResourceDeleteContextFunc(
+		sdk.ParseSchemaObjectIdentifier,
+		func(client *sdk.Client) DropSafelyFunc[sdk.SchemaObjectIdentifier] {
+			return client.Streamlits.DropSafely
+		},
+	)
+
 	return &schema.Resource{
 		SchemaVersion: 1,
 
 		CreateContext: TrackingCreateWrapper(resources.Streamlit, CreateContextStreamlit),
 		ReadContext:   TrackingReadWrapper(resources.Streamlit, ReadContextStreamlit),
 		UpdateContext: TrackingUpdateWrapper(resources.Streamlit, UpdateContextStreamlit),
-		DeleteContext: TrackingDeleteWrapper(resources.Streamlit, DeleteContextStreamlit),
+		DeleteContext: TrackingDeleteWrapper(resources.Streamlit, deleteFunc),
 		Description:   "Resource used to manage streamlits objects. For more information, check [streamlit documentation](https://docs.snowflake.com/en/sql-reference/commands-streamlit).",
 
 		Schema: streamlitSchema,
@@ -252,7 +259,7 @@ func ReadContextStreamlit(ctx context.Context, d *schema.ResourceData, meta any)
 		return diag.FromErr(err)
 	}
 
-	streamlit, err := client.Streamlits.ShowByID(ctx, id)
+	streamlit, err := client.Streamlits.ShowByIDSafely(ctx, id)
 	if err != nil {
 		if errors.Is(err, sdk.ErrObjectNotFound) {
 			d.SetId("")
@@ -260,7 +267,7 @@ func ReadContextStreamlit(ctx context.Context, d *schema.ResourceData, meta any)
 				diag.Diagnostic{
 					Severity: diag.Warning,
 					Summary:  "Failed to query streamlit. Marking the resource as removed.",
-					Detail:   fmt.Sprintf("Streamlit name: %s, Err: %s", id.FullyQualifiedName(), err),
+					Detail:   fmt.Sprintf("Streamlit id: %s, Err: %s", id.FullyQualifiedName(), err),
 				},
 			}
 		}
@@ -416,26 +423,4 @@ func UpdateContextStreamlit(ctx context.Context, d *schema.ResourceData, meta an
 	}
 
 	return ReadContextStreamlit(ctx, d, meta)
-}
-
-func DeleteContextStreamlit(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client := meta.(*provider.Context).Client
-	id, err := sdk.ParseSchemaObjectIdentifier(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = client.Streamlits.Drop(ctx, sdk.NewDropStreamlitRequest(id).WithIfExists(true))
-	if err != nil {
-		return diag.Diagnostics{
-			diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Error deleting streamlit",
-				Detail:   fmt.Sprintf("id %v err = %v", id.Name(), err),
-			},
-		}
-	}
-
-	d.SetId("")
-	return nil
 }

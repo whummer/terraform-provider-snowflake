@@ -25,9 +25,15 @@ var (
 	TestDatabaseName  = fmt.Sprintf("%sdb_%s", IntegrationTestPrefix, integrationtests.ObjectsSuffix)
 	TestSchemaName    = fmt.Sprintf("%ssc_%s", IntegrationTestPrefix, integrationtests.ObjectsSuffix)
 
-	NonExistingAccountObjectIdentifier  = sdk.NewAccountObjectIdentifier("does_not_exist")
-	NonExistingDatabaseObjectIdentifier = sdk.NewDatabaseObjectIdentifier(TestDatabaseName, "does_not_exist")
-	NonExistingSchemaObjectIdentifier   = sdk.NewSchemaObjectIdentifier(TestDatabaseName, TestSchemaName, "does_not_exist")
+	NonExistingAccountObjectIdentifier                                             = sdk.NewAccountObjectIdentifier("does_not_exist")
+	NonExistingDatabaseObjectIdentifier                                            = sdk.NewDatabaseObjectIdentifier(TestDatabaseName, "does_not_exist")
+	NonExistingDatabaseObjectIdentifierWithNonExistingDatabase                     = sdk.NewDatabaseObjectIdentifier("does_not_exist", "does_not_exist")
+	NonExistingSchemaObjectIdentifier                                              = sdk.NewSchemaObjectIdentifier(TestDatabaseName, TestSchemaName, "does_not_exist")
+	NonExistingSchemaObjectIdentifierWithNonExistingSchema                         = sdk.NewSchemaObjectIdentifier(TestDatabaseName, "does_not_exist", "does_not_exist")
+	NonExistingSchemaObjectIdentifierWithNonExistingDatabaseAndSchema              = sdk.NewSchemaObjectIdentifier("does_not_exist", "does_not_exist", "does_not_exist")
+	NonExistingSchemaObjectIdentifierWithArguments                                 = sdk.NewSchemaObjectIdentifierWithArguments(TestDatabaseName, TestSchemaName, "does_not_exist", sdk.DataTypeInt)
+	NonExistingSchemaObjectIdentifierWithArgumentsWithNonExistingSchema            = sdk.NewSchemaObjectIdentifierWithArguments(TestDatabaseName, "does_not_exist", "does_not_exist", sdk.DataTypeInt)
+	NonExistingSchemaObjectIdentifierWithArgumentsWithNonExistingDatabaseAndSchema = sdk.NewSchemaObjectIdentifierWithArguments("does_not_exist", "does_not_exist", "does_not_exist", sdk.DataTypeInt)
 )
 
 var itc integrationTestContext
@@ -113,7 +119,7 @@ func (itc *integrationTestContext) initialize() error {
 		return errors.New("test object suffix is required for this test run")
 	}
 
-	defaultConfig, err := sdk.ProfileConfig(testprofiles.Default, true)
+	defaultConfig, err := sdk.ProfileConfig(testprofiles.Default, sdk.WithVerifyPermissions(true))
 	if err != nil {
 		return err
 	}
@@ -164,7 +170,7 @@ func (itc *integrationTestContext) initialize() error {
 
 	// TODO [SNOW-1763603]: improve setup; this is a quick workaround for faster local testing
 	if os.Getenv(string(testenvs.SimplifiedIntegrationTestsSetup)) == "" {
-		config, err := sdk.ProfileConfig(testprofiles.Secondary, true)
+		config, err := sdk.ProfileConfig(testprofiles.Secondary, sdk.WithVerifyPermissions(true))
 		if err != nil {
 			return err
 		}

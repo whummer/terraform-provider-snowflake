@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/internal/collections"
 )
 
 var (
@@ -20,8 +22,10 @@ type Shares interface {
 	Create(ctx context.Context, id AccountObjectIdentifier, opts *CreateShareOptions) error
 	Alter(ctx context.Context, id AccountObjectIdentifier, opts *AlterShareOptions) error
 	Drop(ctx context.Context, id AccountObjectIdentifier, opts *DropShareOptions) error
+	DropSafely(ctx context.Context, id AccountObjectIdentifier) error
 	Show(ctx context.Context, opts *ShowShareOptions) ([]Share, error)
 	ShowByID(ctx context.Context, id AccountObjectIdentifier) (*Share, error)
+	ShowByIDSafely(ctx context.Context, id AccountObjectIdentifier) (*Share, error)
 	DescribeProvider(ctx context.Context, id AccountObjectIdentifier) (*ShareDetails, error)
 	DescribeConsumer(ctx context.Context, id ExternalObjectIdentifier) (*ShareDetails, error)
 }
@@ -169,6 +173,10 @@ func (s *shares) Drop(ctx context.Context, id AccountObjectIdentifier, opts *Dro
 	return err
 }
 
+func (s *shares) DropSafely(ctx context.Context, id AccountObjectIdentifier) error {
+	return SafeDrop(s.client, func() error { return s.Drop(ctx, id, &DropShareOptions{IfExists: Bool(true)}) }, ctx, id)
+}
+
 // AlterShareOptions is based on https://docs.snowflake.com/en/sql-reference/sql/alter-share.
 type AlterShareOptions struct {
 	alter    bool                    `ddl:"static" sql:"ALTER"`
@@ -314,12 +322,13 @@ func (s *shares) ShowByID(ctx context.Context, id AccountObjectIdentifier) (*Sha
 	if err != nil {
 		return nil, err
 	}
-	for _, share := range shares {
-		if share.Name.Name() == id.Name() {
-			return &share, nil
-		}
-	}
-	return nil, ErrObjectNotExistOrAuthorized
+	return collections.FindFirst(shares, func(share Share) bool {
+		return share.ID().FullyQualifiedName() == id.FullyQualifiedName()
+	})
+}
+
+func (s *shares) ShowByIDSafely(ctx context.Context, id AccountObjectIdentifier) (*Share, error) {
+	return SafeShowById(s.client, s.ShowByID, ctx, id)
 }
 
 type ShareDetails struct {

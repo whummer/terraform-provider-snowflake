@@ -1,3 +1,5 @@
+//go:build account_level_tests
+
 package resources_test
 
 import (
@@ -42,6 +44,8 @@ func TestAcc_User_BasicFlows(t *testing.T) {
 	key1, _ := random.GenerateRSAPublicKey(t)
 	key2, _ := random.GenerateRSAPublicKey(t)
 
+	loginName := random.SensitiveAlphanumeric()
+	newLoginName := random.SensitiveAlphanumeric()
 	pass := random.Password()
 	newPass := random.Password()
 
@@ -51,7 +55,7 @@ func TestAcc_User_BasicFlows(t *testing.T) {
 
 	userModelAllAttributes := model.User("w", id.Name()).
 		WithPassword(pass).
-		WithLoginName(id.Name() + "_login").
+		WithLoginName(loginName).
 		WithDisplayName("Display Name").
 		WithFirstName("Jan").
 		WithMiddleName("Jakub").
@@ -175,7 +179,7 @@ func TestAcc_User_BasicFlows(t *testing.T) {
 					resourceassert.UserResource(t, userModelAllAttributes.ResourceReference()).
 						HasNameString(id.Name()).
 						HasPasswordString(pass).
-						HasLoginNameString(fmt.Sprintf("%s_login", id.Name())).
+						HasLoginNameString(loginName).
 						HasDisplayNameString("Display Name").
 						HasFirstNameString("Jan").
 						HasMiddleNameString("Jakub").
@@ -199,12 +203,12 @@ func TestAcc_User_BasicFlows(t *testing.T) {
 			},
 			// CHANGE PROPERTIES
 			{
-				Config: config.FromModels(t, userModelAllAttributesChanged(id.Name()+"_other_login")),
+				Config: config.FromModels(t, userModelAllAttributesChanged(newLoginName)),
 				Check: assertThat(t,
-					resourceassert.UserResource(t, userModelAllAttributesChanged(id.Name()+"_other_login").ResourceReference()).
+					resourceassert.UserResource(t, userModelAllAttributesChanged(newLoginName).ResourceReference()).
 						HasNameString(id.Name()).
 						HasPasswordString(newPass).
-						HasLoginNameString(fmt.Sprintf("%s_other_login", id.Name())).
+						HasLoginNameString(newLoginName).
 						HasDisplayNameString("New Display Name").
 						HasFirstNameString("Janek").
 						HasMiddleNameString("Kuba").
@@ -228,22 +232,22 @@ func TestAcc_User_BasicFlows(t *testing.T) {
 			},
 			// IMPORT
 			{
-				ResourceName:            userModelAllAttributesChanged(id.Name() + "_other_login").ResourceReference(),
+				ResourceName:            userModelAllAttributesChanged(newLoginName).ResourceReference(),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password", "disable_mfa", "days_to_expiry", "mins_to_unlock", "mins_to_bypass_mfa", "default_namespace", "login_name", "show_output.0.days_to_expiry"},
 				ImportStateCheck: assertThatImport(t,
 					resourceassert.ImportedUserResource(t, id.Name()).
 						HasDefaultNamespaceString("ONE_PART_NAMESPACE").
-						HasLoginNameString(fmt.Sprintf("%s_OTHER_LOGIN", id.Name())),
+						HasLoginNameString(strings.ToUpper(newLoginName)),
 				),
 			},
 			// CHANGE PROP TO THE CURRENT SNOWFLAKE VALUE
 			{
 				PreConfig: func() {
-					acc.TestClient().User.SetLoginName(t, id, id.Name()+"_different_login")
+					acc.TestClient().User.SetLoginName(t, id, loginName)
 				},
-				Config: config.FromModels(t, userModelAllAttributesChanged(id.Name()+"_different_login")),
+				Config: config.FromModels(t, userModelAllAttributesChanged(loginName)),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PostApplyPostRefresh: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
@@ -1473,9 +1477,10 @@ func TestAcc_User_LoginNameAndDisplayName(t *testing.T) {
 	id := acc.TestClient().Ids.RandomAccountObjectIdentifier()
 	newId := acc.TestClient().Ids.RandomAccountObjectIdentifier()
 
+	loginName := random.SensitiveAlphanumeric()
 	userModelWithoutBoth := model.User("w", id.Name())
 	userModelWithNewId := model.User("w", newId.Name())
-	userModelWithBoth := model.User("w", newId.Name()).WithLoginName("login_name").WithDisplayName("display_name")
+	userModelWithBoth := model.User("w", newId.Name()).WithLoginName(loginName).WithDisplayName("display_name")
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acc.TestAccProtoV6ProviderFactories,
@@ -1515,10 +1520,10 @@ func TestAcc_User_LoginNameAndDisplayName(t *testing.T) {
 				Check: assertThat(t,
 					resourceassert.UserResource(t, userModelWithBoth.ResourceReference()).
 						HasDisplayNameString("display_name").
-						HasLoginNameString("login_name"),
+						HasLoginNameString(loginName),
 					objectassert.User(t, newId).
 						HasDisplayName("display_name").
-						HasLoginName("LOGIN_NAME"),
+						HasLoginName(strings.ToUpper(loginName)),
 				),
 			},
 			// Unset externally
@@ -1537,10 +1542,10 @@ func TestAcc_User_LoginNameAndDisplayName(t *testing.T) {
 				Check: assertThat(t,
 					resourceassert.UserResource(t, userModelWithBoth.ResourceReference()).
 						HasDisplayNameString("display_name").
-						HasLoginNameString("login_name"),
+						HasLoginNameString(loginName),
 					objectassert.User(t, newId).
 						HasDisplayName("display_name").
-						HasLoginName("LOGIN_NAME"),
+						HasLoginName(strings.ToUpper(loginName)),
 				),
 			},
 			// Unset both params
@@ -1562,7 +1567,7 @@ func TestAcc_User_LoginNameAndDisplayName(t *testing.T) {
 						Set: &sdk.UserSet{
 							ObjectProperties: &sdk.UserAlterObjectProperties{
 								UserObjectProperties: sdk.UserObjectProperties{
-									LoginName:   sdk.String("external_login_name"),
+									LoginName:   sdk.String("external_" + loginName),
 									DisplayName: sdk.String("external_display_name"),
 								},
 							},
@@ -1760,4 +1765,107 @@ func TestAcc_User_importPassword(t *testing.T) {
 			},
 		},
 	})
+}
+
+// https://github.com/snowflakedb/terraform-provider-snowflake/issues/3522
+// The issue arises when the following steps happen:
+// 1. Object is created.
+// 2. Object's attribute is updated to computed value of other object added in this run.
+// diff.HasChange(changedKey) used in ComputedIfAnyAttributeChanged does not trigger, so the whole show_output is not marked as new attribute.
+// The original set up would require additional external provider, so to simplify, we use computed value from other object.
+// TestAcc_User_gh3522_proof test shows the previous behavior, TestAcc_User_gh3522_fix confirms the fix.
+func TestAcc_User_gh3522_proof(t *testing.T) {
+	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+	acc.TestAccPreCheck(t)
+
+	userId := acc.TestClient().Ids.RandomAccountObjectIdentifier()
+	userId2 := acc.TestClient().Ids.RandomAccountObjectIdentifier()
+	comment := random.Comment()
+
+	resource.Test(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.RequireAbove(tfversion.Version1_5_0),
+		},
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		CheckDestroy: acc.CheckDestroy(t, resources.User),
+		Steps: []resource.TestStep{
+			{
+				ExternalProviders: acc.ExternalProviderWithExactVersion("1.0.5"),
+				Config:            gh3522ConfigFirstStep(userId),
+				Check: assertThat(t, resourceassert.UserResource(t, "snowflake_legacy_service_user.one").
+					HasNoComment(),
+				),
+			},
+			{
+				ExternalProviders: acc.ExternalProviderWithExactVersion("1.0.5"),
+				Config:            gh3522ConfigSecondStep(userId, userId2, comment),
+				// Resulting in:
+				// | Error: Provider produced inconsistent final plan
+				// |
+				// | When expanding the plan for snowflake_legacy_service_user.one to include new
+				// | values learned so far during apply, provider
+				// | "registry.terraform.io/hashicorp/snowflake" produced an invalid new value for
+				// | .show_output: was known, but now unknown.
+				// |
+				// | This is a bug in the provider, which should be reported in the provider's own
+				// | issue tracker.
+				ExpectError: regexp.MustCompile("Provider produced inconsistent final plan"),
+			},
+		},
+	})
+}
+
+// Check TestAcc_User_gh3522_proof for details.
+func TestAcc_User_gh3522_fix(t *testing.T) {
+	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+	acc.TestAccPreCheck(t)
+
+	userId := acc.TestClient().Ids.RandomAccountObjectIdentifier()
+	userId2 := acc.TestClient().Ids.RandomAccountObjectIdentifier()
+	comment := random.Comment()
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acc.TestAccProtoV6ProviderFactories,
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.RequireAbove(tfversion.Version1_5_0),
+		},
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		CheckDestroy: acc.CheckDestroy(t, resources.User),
+		Steps: []resource.TestStep{
+			{
+				Config: gh3522ConfigFirstStep(userId),
+				Check: assertThat(t, resourceassert.UserResource(t, "snowflake_legacy_service_user.one").
+					HasNoComment(),
+				),
+			},
+			{
+				Config: gh3522ConfigSecondStep(userId, userId2, comment),
+				Check: assertThat(t, resourceassert.UserResource(t, "snowflake_legacy_service_user.one").
+					HasCommentString(comment),
+				),
+			},
+		},
+	})
+}
+
+func gh3522ConfigFirstStep(userId sdk.AccountObjectIdentifier) string {
+	return fmt.Sprintf(`
+resource "snowflake_legacy_service_user" "one" {
+  name           = "%[1]s"
+}
+`, userId.Name())
+}
+
+func gh3522ConfigSecondStep(userId sdk.AccountObjectIdentifier, userId2 sdk.AccountObjectIdentifier, comment string) string {
+	return fmt.Sprintf(`
+resource "snowflake_legacy_service_user" "one" {
+  name    = "%[1]s"
+  comment = snowflake_legacy_service_user.two.show_output.0.comment
+}
+
+resource "snowflake_legacy_service_user" "two" {
+  name    = "%[2]s"
+  comment = "%[3]s"
+}
+`, userId.Name(), userId2.Name(), comment)
 }

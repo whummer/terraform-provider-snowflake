@@ -21,22 +21,22 @@ import (
 func TestLoadConfigFile(t *testing.T) {
 	c := `
 	[default]
-	accountname='TEST_ACCOUNT'
-	organizationname='TEST_ORG'
+	account_name='TEST_ACCOUNT'
+	organization_name='TEST_ORG'
 	user='TEST_USER'
 	password='abcd1234'
 	role='ACCOUNTADMIN'
 
 	[securityadmin]
-	accountname='TEST_ACCOUNT'
-	organizationname='TEST_ORG'
+	account_name='TEST_ACCOUNT'
+	organization_name='TEST_ORG'
 	user='TEST_USER'
 	password='abcd1234'
 	role='SECURITYADMIN'
 	`
 	configPath := testhelpers.TestFile(t, "config", []byte(c))
 
-	m, err := LoadConfigFile(configPath, true)
+	m, err := LoadConfigFile[*ConfigDTO](configPath, true)
 	require.NoError(t, err)
 	assert.Equal(t, "TEST_ACCOUNT", *m["default"].AccountName)
 	assert.Equal(t, "TEST_ORG", *m["default"].OrganizationName)
@@ -54,13 +54,13 @@ func TestLoadConfigFileWithUnknownFields(t *testing.T) {
 	c := `
 	[default]
 	unknown='TEST_ACCOUNT'
-	accountname='TEST_ACCOUNT'
+	account_name='TEST_ACCOUNT'
 	`
 	configPath := testhelpers.TestFile(t, "config", []byte(c))
 
-	m, err := LoadConfigFile(configPath, true)
+	m, err := LoadConfigFile[*ConfigDTO](configPath, true)
 	require.NoError(t, err)
-	assert.Equal(t, map[string]ConfigDTO{
+	assert.Equal(t, map[string]*ConfigDTO{
 		"default": {
 			AccountName: Pointer("TEST_ACCOUNT"),
 		},
@@ -73,8 +73,8 @@ func TestLoadConfigFileWithInvalidFieldTypeFails(t *testing.T) {
 		fieldName string
 		wantType  string
 	}{
-		{name: "AccountName", fieldName: "accountname", wantType: "*string"},
-		{name: "OrganizationName", fieldName: "organizationname", wantType: "*string"},
+		{name: "AccountName", fieldName: "account_name", wantType: "*string"},
+		{name: "OrganizationName", fieldName: "organization_name", wantType: "*string"},
 		{name: "User", fieldName: "user", wantType: "*string"},
 		{name: "Username", fieldName: "username", wantType: "*string"},
 		{name: "Password", fieldName: "password", wantType: "*string"},
@@ -82,27 +82,27 @@ func TestLoadConfigFileWithInvalidFieldTypeFails(t *testing.T) {
 		{name: "Warehouse", fieldName: "warehouse", wantType: "*string"},
 		{name: "Role", fieldName: "role", wantType: "*string"},
 		{name: "Params", fieldName: "params", wantType: "*map[string]*string"},
-		{name: "ClientIp", fieldName: "clientip", wantType: "*string"},
+		{name: "ClientIp", fieldName: "client_ip", wantType: "*string"},
 		{name: "Protocol", fieldName: "protocol", wantType: "*string"},
 		{name: "Passcode", fieldName: "passcode", wantType: "*string"},
-		{name: "PasscodeInPassword", fieldName: "passcodeinpassword", wantType: "*bool"},
-		{name: "OktaUrl", fieldName: "oktaurl", wantType: "*string"},
+		{name: "PasscodeInPassword", fieldName: "passcode_in_password", wantType: "*bool"},
+		{name: "OktaUrl", fieldName: "okta_url", wantType: "*string"},
 		{name: "Authenticator", fieldName: "authenticator", wantType: "*string"},
-		{name: "InsecureMode", fieldName: "insecuremode", wantType: "*bool"},
-		{name: "OcspFailOpen", fieldName: "ocspfailopen", wantType: "*bool"},
+		{name: "InsecureMode", fieldName: "insecure_mode", wantType: "*bool"},
+		{name: "OcspFailOpen", fieldName: "ocsp_fail_open", wantType: "*bool"},
 		{name: "Token", fieldName: "token", wantType: "*string"},
-		{name: "KeepSessionAlive", fieldName: "keepsessionalive", wantType: "*bool"},
-		{name: "PrivateKey", fieldName: "privatekey", wantType: "*string"},
-		{name: "PrivateKeyPassphrase", fieldName: "privatekeypassphrase", wantType: "*string"},
-		{name: "DisableTelemetry", fieldName: "disabletelemetry", wantType: "*bool"},
-		{name: "ValidateDefaultParameters", fieldName: "validatedefaultparameters", wantType: "*bool"},
-		{name: "ClientRequestMfaToken", fieldName: "clientrequestmfatoken", wantType: "*bool"},
-		{name: "ClientStoreTemporaryCredential", fieldName: "clientstoretemporarycredential", wantType: "*bool"},
-		{name: "Tracing", fieldName: "tracing", wantType: "*string"},
-		{name: "TmpDirPath", fieldName: "tmpdirpath", wantType: "*string"},
-		{name: "DisableQueryContextCache", fieldName: "disablequerycontextcache", wantType: "*bool"},
-		{name: "IncludeRetryReason", fieldName: "includeretryreason", wantType: "*bool"},
-		{name: "DisableConsoleLogin", fieldName: "disableconsolelogin", wantType: "*bool"},
+		{name: "KeepSessionAlive", fieldName: "keep_session_alive", wantType: "*bool"},
+		{name: "PrivateKey", fieldName: "private_key", wantType: "*string"},
+		{name: "PrivateKeyPassphrase", fieldName: "private_key_passphrase", wantType: "*string"},
+		{name: "DisableTelemetry", fieldName: "disable_telemetry", wantType: "*bool"},
+		{name: "ValidateDefaultParameters", fieldName: "validate_default_parameters", wantType: "*bool"},
+		{name: "ClientRequestMfaToken", fieldName: "client_request_mfa_token", wantType: "*bool"},
+		{name: "ClientStoreTemporaryCredential", fieldName: "client_store_temporary_credential", wantType: "*bool"},
+		{name: "DriverTracing", fieldName: "driver_tracing", wantType: "*string"},
+		{name: "TmpDirPath", fieldName: "tmp_dir_path", wantType: "*string"},
+		{name: "DisableQueryContextCache", fieldName: "disable_query_context_cache", wantType: "*bool"},
+		{name: "IncludeRetryReason", fieldName: "include_retry_reason", wantType: "*bool"},
+		{name: "DisableConsoleLogin", fieldName: "disable_console_login", wantType: "*bool"},
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s has to have a correct type", tt.name), func(t *testing.T) {
@@ -112,7 +112,7 @@ func TestLoadConfigFileWithInvalidFieldTypeFails(t *testing.T) {
 		`, tt.fieldName)
 			configPath := testhelpers.TestFile(t, "config", []byte(config))
 
-			_, err := LoadConfigFile(configPath, true)
+			_, err := LoadConfigFile[*ConfigDTO](configPath, true)
 			require.ErrorContains(t, err, fmt.Sprintf("toml: cannot decode TOML integer into struct field sdk.ConfigDTO.%s of type %s", tt.name, tt.wantType))
 		})
 	}
@@ -124,13 +124,13 @@ func TestLoadConfigFileWithInvalidFieldTypeIntFails(t *testing.T) {
 		fieldName string
 	}{
 		{name: "Port", fieldName: "port"},
-		{name: "ClientTimeout", fieldName: "clienttimeout"},
-		{name: "JwtClientTimeout", fieldName: "jwtclienttimeout"},
-		{name: "LoginTimeout", fieldName: "logintimeout"},
-		{name: "RequestTimeout", fieldName: "requesttimeout"},
-		{name: "JwtExpireTimeout", fieldName: "jwtexpiretimeout"},
-		{name: "ExternalBrowserTimeout", fieldName: "externalbrowsertimeout"},
-		{name: "MaxRetryCount", fieldName: "maxretrycount"},
+		{name: "ClientTimeout", fieldName: "client_timeout"},
+		{name: "JwtClientTimeout", fieldName: "jwt_client_timeout"},
+		{name: "LoginTimeout", fieldName: "login_timeout"},
+		{name: "RequestTimeout", fieldName: "request_timeout"},
+		{name: "JwtExpireTimeout", fieldName: "jwt_expire_timeout"},
+		{name: "ExternalBrowserTimeout", fieldName: "external_browser_timeout"},
+		{name: "MaxRetryCount", fieldName: "max_retry_count"},
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s has to have a correct type", tt.name), func(t *testing.T) {
@@ -140,7 +140,7 @@ func TestLoadConfigFileWithInvalidFieldTypeIntFails(t *testing.T) {
 		`, tt.fieldName)
 			configPath := testhelpers.TestFile(t, "config", []byte(config))
 
-			_, err := LoadConfigFile(configPath, true)
+			_, err := LoadConfigFile[*ConfigDTO](configPath, true)
 			require.ErrorContains(t, err, "toml: incomplete number")
 		})
 	}
@@ -157,7 +157,7 @@ func TestLoadConfigFileWithInvalidTOMLFails(t *testing.T) {
 			config: `
 			[default]
 			password="sensitive"
-			accountname=
+			account_name=
 			`,
 			err: "toml: incomplete number",
 		},
@@ -175,9 +175,9 @@ func TestLoadConfigFileWithInvalidTOMLFails(t *testing.T) {
 			config: `
 			[default]
 			password="sensitive"
-			accountname="value"
+			account_name="value"
 			[default]
-			organizationname="value"
+			organization_name="value"
 			`,
 			err: "toml: table default already exists",
 		},
@@ -186,17 +186,17 @@ func TestLoadConfigFileWithInvalidTOMLFails(t *testing.T) {
 			config: `
 			[default]
 			password="sensitive"
-			accountname="foo"
-			accountname="bar"
+			account_name="foo"
+			account_name="bar"
 			`,
-			err: "toml: key accountname is already defined",
+			err: "toml: key account_name is already defined",
 		},
 		{
 			name: "more than one key in a line",
 			config: `
 			[default]
 			password="sensitive"
-			accountname="account" organizationname="organizationname"
+			account_name="account" organizationname="organizationname"
 			`,
 			err: "toml: expected newline but got U+006F 'o'",
 		},
@@ -205,30 +205,11 @@ func TestLoadConfigFileWithInvalidTOMLFails(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			configPath := testhelpers.TestFile(t, "config", []byte(tt.config))
 
-			_, err := LoadConfigFile(configPath, true)
+			_, err := LoadConfigFile[*ConfigDTO](configPath, true)
 			require.ErrorContains(t, err, tt.err)
 			require.NotContains(t, err.Error(), "sensitive")
 		})
 	}
-}
-
-func TestParsingPrivateKeyDoesNotReturnSensitiveValues(t *testing.T) {
-	unencryptedKey, encryptedKey := random.GenerateRSAPrivateKeyEncrypted(t, "password")
-
-	// Make the key invalid.
-	sensitive := "sensitive"
-	unencryptedKey = unencryptedKey[:50] + sensitive + unencryptedKey[50:]
-	_, err := ParsePrivateKey([]byte(unencryptedKey), []byte{})
-	require.Error(t, err)
-	require.NotContains(t, err.Error(), "PRIVATE KEY")
-	require.NotContains(t, err.Error(), sensitive)
-
-	// Use an invalid password.
-	badPassword := "bad_password"
-	_, err = ParsePrivateKey([]byte(encryptedKey), []byte(badPassword))
-	require.Error(t, err)
-	require.NotContains(t, err.Error(), "PRIVATE KEY")
-	require.NotContains(t, err.Error(), badPassword)
 }
 
 func TestProfileConfig(t *testing.T) {
@@ -237,42 +218,42 @@ func TestProfileConfig(t *testing.T) {
 	c := fmt.Sprintf(`
 	[securityadmin]
 	account='account'
-	accountname='accountname'
-	organizationname='organizationname'
+	account_name='accountname'
+	organization_name='organizationname'
 	user='user'
 	password='password'
 	host='host'
 	warehouse='warehouse'
 	role='role'
-	clientip='1.1.1.1'
+	client_ip='1.1.1.1'
 	protocol='http'
 	passcode='passcode'
 	port=1
-	passcodeinpassword=true
-	oktaurl='%[3]s'
-	clienttimeout=10
-	jwtclienttimeout=20
-	logintimeout=30
-	requesttimeout=40
-	jwtexpiretimeout=50
-	externalbrowsertimeout=60
-	maxretrycount=1
+	passcode_in_password=true
+	okta_url='%[3]s'
+	client_timeout=10
+	jwt_client_timeout=20
+	login_timeout=30
+	request_timeout=40
+	jwt_expire_timeout=50
+	external_browser_timeout=60
+	max_retry_count=1
 	authenticator='SNOWFLAKE_JWT'
-	insecuremode=true
-	ocspfailopen=true
+	insecure_mode=true
+	ocsp_fail_open=true
 	token='token'
-	keepsessionalive=true
-	privatekey="""%[1]s"""
-	privatekeypassphrase='%[2]s'
-	disabletelemetry=true
-	validatedefaultparameters=true
-	clientrequestmfatoken=true
-	clientstoretemporarycredential=true
-	tracing='tracing'
-	tmpdirpath='.'
-	disablequerycontextcache=true
-	includeretryreason=true
-	disableconsolelogin=true
+	keep_session_alive=true
+	private_key="""%[1]s"""
+	private_key_passphrase='%[2]s'
+	disable_telemetry=true
+	validate_default_parameters=true
+	client_request_mfa_token=true
+	client_store_temporary_credential=true
+	driver_tracing='tracing'
+	tmp_dir_path='.'
+	disable_query_context_cache=true
+	include_retry_reason=true
+	disable_console_login=true
 
 	[securityadmin.params]
 	foo = 'bar'
@@ -282,7 +263,7 @@ func TestProfileConfig(t *testing.T) {
 	t.Run("with found profile", func(t *testing.T) {
 		t.Setenv(snowflakeenvs.ConfigPath, configPath)
 
-		config, err := ProfileConfig("securityadmin", true)
+		config, err := ProfileConfig("securityadmin", WithVerifyPermissions(true), WithUseLegacyTomlFormat(false))
 		require.NoError(t, err)
 		require.NotNil(t, config.PrivateKey)
 
@@ -336,7 +317,7 @@ func TestProfileConfig(t *testing.T) {
 	t.Run("with not found profile", func(t *testing.T) {
 		t.Setenv(snowflakeenvs.ConfigPath, configPath)
 
-		config, err := ProfileConfig("orgadmin", true)
+		config, err := ProfileConfig("orgadmin", WithVerifyPermissions(true), WithUseLegacyTomlFormat(false))
 		require.NoError(t, err)
 		require.Nil(t, config)
 	})
@@ -345,10 +326,29 @@ func TestProfileConfig(t *testing.T) {
 		filename := random.AlphaN(8)
 		t.Setenv(snowflakeenvs.ConfigPath, filename)
 
-		config, err := ProfileConfig("orgadmin", true)
+		config, err := ProfileConfig("orgadmin", WithVerifyPermissions(true), WithUseLegacyTomlFormat(false))
 		require.ErrorContains(t, err, fmt.Sprintf("could not load config file: reading information about the config file: stat %s: no such file or directory", filename))
 		require.Nil(t, config)
 	})
+}
+
+func TestParsingPrivateKeyDoesNotReturnSensitiveValues(t *testing.T) {
+	unencryptedKey, encryptedKey := random.GenerateRSAPrivateKeyEncrypted(t, "password")
+
+	// Make the key invalid.
+	sensitive := "sensitive"
+	unencryptedKey = unencryptedKey[:50] + sensitive + unencryptedKey[50:]
+	_, err := ParsePrivateKey([]byte(unencryptedKey), []byte{})
+	require.Error(t, err)
+	require.NotContains(t, err.Error(), "PRIVATE KEY")
+	require.NotContains(t, err.Error(), sensitive)
+
+	// Use an invalid password.
+	badPassword := "bad_password"
+	_, err = ParsePrivateKey([]byte(encryptedKey), []byte(badPassword))
+	require.Error(t, err)
+	require.NotContains(t, err.Error(), "PRIVATE KEY")
+	require.NotContains(t, err.Error(), badPassword)
 }
 
 func Test_MergeConfig(t *testing.T) {
