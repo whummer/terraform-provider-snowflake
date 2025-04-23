@@ -7,10 +7,166 @@ across different versions.
 > [!TIP]
 > We highly recommend upgrading the versions one by one instead of bulk upgrades.
 >
-> If you want to upgrade multiple versions at once, consider reimporting your infrastructure using the newer provider version. Follow our [Resource Migration](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/guides/resource_migration) guide for more details.
+> To migrate particular resources, follow our [Resource Migration](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/guides/resource_migration) guide for more details.
+>
+> In certain cases (like using the ancient provider versions), you can upgrade multiple versions at once. To do that:
+> - read the target version documentation and all the intermediary migration guide entries;
+> - focus on changes to authentication to make sure your provider is set up correctly in the newest version;
+> - check changes to resource schemas; if in doubt, you can always simplify the resource and let the terraform figure out the changes (you can use plan output to make the configuration appropriate);
+> - reimport your infrastructure using the target provider version, preferably in smaller chunks (or experiment with 1-2 resources of each type first).
 
 > [!TIP]
 > If you're still using the `Snowflake-Labs/snowflake` source, see [Upgrading from Snowflake-Labs Provider](./SNOWFLAKEDB_MIGRATION.md) to upgrade to the snowflakedb namespace.
+
+## v1.2.1 ➞ v2.0.0
+
+### Supported architectures
+
+We have compiled a list to clarify which binaries are officially supported and which are provided additionally but not officially supported.
+The lists are based on what the underlying [gosnowflake driver](https://github.com/snowflakedb/gosnowflake) supports and what [HashiCorp recommends for Terraform providers](https://developer.hashicorp.com/terraform/registry/providers/os-arch).
+
+The provider officially supports the binaries built for the following OSes and architectures:
+- Windows: amd64
+- Linux: amd64 and arm64
+- Darwin: amd64 and arm64
+
+Currently, we also provide the binaries for the following OSes and architectures, but they are not officially supported, and we do not prioritize fixes for them:
+- Windows: arm64 and 386
+- Linux: 386
+- Darwin: 386
+- Freebsd: any architecture
+
+### *(breaking change)* Changes in sensitive values
+To ensure better security of users' data, we adjusted the fields containing sensitive information to be sensitive in the provider.
+Some fields had to be removed due to Terraform SDK limitations (more on that in the [removal of sensitive fields](#removal-of-sensitive-fields) section).
+This means these values will not be printed by Terraform during planning, etc. Note that the users are still responsible for storing the state securely. 
+Read more about sensitive values in the [Terraform documentation](https://developer.hashicorp.com/terraform/tutorials/configuration-language/sensitive-variables).
+
+Fields changed to sensitive:
+- provider configuration: `passcode` field
+- `snowflake_system_generate_scim_access_token` data source: `access_token` field
+- `snowflake_api_authentication_integration_with_authorization_code_grant` resource: `oauth_client_id` and `oauth_client_secret` fields,
+- `snowflake_api_authentication_integration_with_client_credentials` resource: `oauth_client_id` and `oauth_client_secret` fields,
+- `snowflake_api_authentication_integration_with_jwt_bearer` resource: `oauth_client_id` and `oauth_client_secret` fields,
+- `snowflake_saml2_integration` resource: `saml2_x509_cert` field
+- `snowflake_storage_integration` resource: `azure_consent_url` field
+
+If you reference one of these fields in an output or a variable block, then it needs to be marked as `sensitive = true` in the Terraform configuration. Read [Output documentation](https://developer.hashicorp.com/terraform/language/values/outputs#sensitive-suppressing-values-in-cli-output) and [Variable documentation](https://developer.hashicorp.com/terraform/language/values/variables#suppressing-values-in-cli-output) for more details. In other case, you will get an error like this:
+```
+Planning failed. Terraform encountered an error while generating this plan.
+
+╷
+│ Error: Output refers to sensitive values
+│
+│   on 3565.tf line 84:
+│   84: output "sensitive_output" {
+│
+│ To reduce the risk of accidentally exporting sensitive data that was intended to be only internal, Terraform requires that any root module output containing sensitive data be explicitly marked
+│ as sensitive, to confirm your intent.
+│
+│ If you do intend to export this data, annotate the output value as sensitive by adding the following argument:
+│     sensitive = true
+╵
+```
+
+Some fields, like secure function definitions, can also contain sensitive values. However, because of [SDK v2](https://developer.hashicorp.com/terraform/plugin/sdkv2) limitations:
+- There is no possibility to mark sensitive values conditionally ([reference](https://github.com/hashicorp/terraform-plugin-sdk/issues/736)). This means it is not possible to mark sensitive values based on other fields, like marking `body` based on the value of `secure` field in views, functions, and procedures. As a result, this field is not marked as sensitive. For such cases, we add disclaimers in the resource documentation.
+- There is no possibility to mark sensitive values in nested fields ([reference](https://github.com/hashicorp/terraform-plugin-sdk/issues/201)). This means the nested fields, like these in `show_output` and `describe_output` cannot be sensitive. fields, like in `show_output` and `describe_output`, cannot be marked as sensitive.
+
+Instead, we added notes in the documentation of the related resources. The full list includes:
+- `snowflake_execute` resource: `execute`, `revert`, `query` and `query_results` fields,
+- `snowflake_external_function` resource: `context_headers` and `header` fields,
+- `snowflake_function_java` resource: `function_definition` and `show_output.arguments_raw` fields,
+- `snowflake_function_javascript` resource: `function_definition` and `show_output.arguments_raw` fields,
+- `snowflake_function_python` resource: `function_definition` and `show_output.arguments_raw` fields,
+- `snowflake_function_scala` resource: `function_definition` and `show_output.arguments_raw` fields,
+- `snowflake_function_sql` resource: `function_definition` and `show_output.arguments_raw` fields,
+- `snowflake_legacy_service_user` resource: `display_name`, `show_output.display_name`, `show_output.email`, `show_output.login_name`, `show_output.first_name` and `show_output.last_name` fields,
+- `snowflake_masking_policy` resource: `body` and `describe_output.body` fields,
+- `snowflake_masking_policies` data source: `describe_output.body` field,
+- `snowflake_materialized_view` resource: `statement` field,
+- `snowflake_oauth_integration_for_custom_clients` resource: `oauth_redirect_uri` and `describe_output.oauth_redirect_uri` fields,
+- `snowflake_oauth_integration_for_partner_applications` resource: `oauth_redirect_uri` and `describe_output.oauth_redirect_uri` fields,
+- `snowflake_materialized_view` resource: `statement` field,
+- `snowflake_procedure_java` resource: `procedure_definition` and `show_output.arguments_raw` fields,
+- `snowflake_procedure_javascript` resource: `procedure_definition` and `show_output.arguments_raw` fields,
+- `snowflake_procedure_python` resource: `procedure_definition` and `show_output.arguments_raw` fields,
+- `snowflake_procedure_scala` resource: `procedure_definition` and `show_output.arguments_raw` fields,
+- `snowflake_procedure_sql` resource: `procedure_definition` and `show_output.arguments_raw` fields,
+- `snowflake_row_access_policy` resource: `body` and `describe_output.body` fields,
+- `snowflake_row_access_policies` data source: `describe_output.body` field,
+- `snowflake_security_integrations` data source: `describe_output.redirect_uri` field,
+- `snowflake_service_user` resource: `display_name`, `show_output.display_name`, `show_output.email`, `show_output.login_name`, `show_output.first_name`, `show_output.middle_name` and `show_output.last_name` fields,
+- `snowflake_task` resource: `config`, `show_output.config` and `show_output.definition` fields,
+- `snowflake_tasks` data source: `show_output.config` and `show_output.definition` fields,
+- `snowflake_user` resource: `display_name`, `show_output.display_name`, `show_output.email`, `show_output.login_name`, `show_output.first_name`, `show_output.middle_name` and `show_output.last_name` fields,
+- `snowflake_users` data source: `display_name`, `email`, `login_name`, `first_name`, `middle_name` and `last_name` fields nested in `show_output` and `describe_output`,
+- `snowflake_view` resource: `statement` and `show_output.text` fields,
+- `snowflake_views` data source: `show_output.text` field,
+
+#### Removal of sensitive fields
+
+The following table represents fields removed from resources. They were removed because of the Terraform SDK limitations
+on marking data as sensitive in objects or collections ([Terraform issue reference](https://github.com/hashicorp/terraform/issues/28222)). Removal of computed output fields may have an impact on detecting
+external changes (on the Snowflake side) for (usually) top-level fields they were referring to (e.g. `describe_output.oauth_client_id` -> `oauth_client_id`).
+
+| Resource name                                                            | Removed fields                                                                                                             |
+|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| `snowflake_saml2_integration`                                            | `describe_output.saml2_x509_cert`, `describe_output.saml2_snowflake_x509_cert`                                             |
+| `snowflake_api_authentication_integration_with_authorization_code_grant` | `describe_output.oauth_client_id`                                                                                          |
+| `snowflake_api_authentication_integration_with_client_credentials`       | `describe_output.oauth_client_id`                                                                                          |
+| `snowflake_api_authentication_integration_with_jwt_bearer`               | `describe_output.oauth_client_id`                                                                                          |
+| `snowflake_oauth_integration_for_partner_applications`                   | `describe_output.oauth_client_id`, `describe_output.oauth_redirect_uri`                                                    |
+| `snowflake_oauth_integration_for_custom_clients`                         | `describe_output.oauth_redirect_uri`, `describe_output.oauth_redirect_uri`                                                 |
+| `snowflake_saml2_integration`                                            | `describe_output.saml2_snowflake_x509_cert`, `describe_output.saml2_x509_cert`                                             |
+| `snowflake_security_integrations` (data source)                          | `security_integrations.describe_output.saml2_snowflake_x509_cert`, `security_integrations.describe_output.saml2_x509_cert` |
+| `snowflake_users` (data source)                                          | `users.describe_output.password`                                                                                           |
+
+### *(breaking change)* Changes in default TOML format
+As we have announced in [an earlier entry](https://github.com/snowflakedb/terraform-provider-snowflake/blob/main/MIGRATION_GUIDE.md#new-toml-file-schema), now the provider uses the new TOML format by default (`use_legacy_toml_file` is `false` by default). This means that when you try running the v2 provider with the same provider configuration which worked before, you can get a following error: `Error: 260000: account is empty` error with non-empty `account` configuration after upgrading to v2.
+
+Please adjust your TOML format, basing on our [example](https://registry.terraform.io/providers/snowflakedb/snowflake/2.0.0/docs#examples).
+
+This is a breaking change because it requires adjustments on the user's side.
+
+Read more details in the mentioned [migration guide entry](https://github.com/snowflakedb/terraform-provider-snowflake/blob/main/MIGRATION_GUIDE.md#new-toml-file-schema).
+
+Alternatively, specify `use_legacy_toml_file=true` in your configuration, but this is not recommended. The legacy format is deprecated and will be removed in the next major release (v3).
+
+### *(breaking change)* Changes in TOML configuration file requirements
+As we have announced in [an earlier entry](https://github.com/snowflakedb/terraform-provider-snowflake/blob/main/MIGRATION_GUIDE.md#changes-in-toml-configuration-file-requirements), now file permissions are verified by default (`skip_toml_file_permission_verification` is `false` by default). This means that on non-Windows systems, when you run the provider, you can get a following error:
+```
+could not load config file: config file /Users/user/.snowflake/config has unsafe permissions - 0755
+```
+Please adjust your file permissions, e.g. `chmod 0600 ~/.snowflake/config`.
+
+This is a breaking change because it requires adjustments on the user's side.
+
+Read more details in the mentioned [migration guide entry](https://github.com/snowflakedb/terraform-provider-snowflake/blob/main/MIGRATION_GUIDE.md#changes-in-toml-configuration-file-requirements).
+
+Alternatively, specify `skip_toml_file_permission_verification=false` in your provider configuration and use the unchanged TOML file, but this is less secure and not recommended.
+
+### *(breaking change)* Improved data type handling for snowflake_masking_policy and snowflake_row_access_policy
+
+The provider bases its logic on data returned from Snowflake. For data types, the responses are not always full, e.g.:
+- `NUMBER(20, 4)` can be returned as `NUMBER`
+- `NUMBER` can be returned as `NUMBER`
+
+When you create an object with data type without specifying its arguments (like `NUMBER` without specified scale and precision), Snowflake fill in the defaults based on [SQL data types reference](https://docs.snowflake.com/en/sql-reference-data-types).
+To be able to detect changes in config properly and to react to some external changes, we updated the way how we handle the data types:
+- We use the Snowflake defaults for data types on the provider side; this is the exception to our [common approach of not hardcoding the Snowflake defaults](v1-preparations/CHANGES_BEFORE_V1.md#default-values) in the provider; we decided that the data type default are far less likely to change.
+- We save the full data type in the state; specifying `NUMBER` will result in storing `NUMBER(38,0)` in state; the same value will be sent to Snowflake.
+- We react to changes in Snowflake only in certain changes; e.g. `NUMBER` -> `VARCHAR`, we can't react on the external change if Snowflake does not return the full data type definition (as above).
+- We will gradually add this logic to all the resources. For now, it was only added to the stable resources: [`snowflake_masking_policy`](https://registry.terraform.io/providers/snowflakedb/snowflake/2.0.0/docs/resources/masking_policy) and [`snowflake_row_access_policy`](https://registry.terraform.io/providers/snowflakedb/snowflake/2.0.0/docs/resources/row_access_policy). We added state upgraders that should handle the state saving changes. There are no changes required, however, you may encounter non-empty plans in these two resources after bumping. Be careful and verify the plan thoroughly as these resources can handle updates only in a destructive manner (this is the limitation of Snowflake SQL syntax for [`ALTER MASKING POLICY`](https://docs.snowflake.com/en/sql-reference/sql/alter-masking-policy) and [`ALTER ROW ACCESS POLICY`](https://docs.snowflake.com/en/sql-reference/sql/alter-row-access-policy)).
+
+### *(bugfix)* Fix CSV_TIMESTAMP_FORMAT handling in snowflake_account_parameters
+
+[`CSV_TIMESTAMP_FORMAT`](https://docs.snowflake.com/en/sql-reference/parameters#csv-timestamp-format) lacked the single quotes in the constructed SQL query. No changes are required.
+
+References: [#3580](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3580)
+
+## v1.2.0 ➞ v1.2.1
+No migration needed.
 
 ## v1.1.0 ➞ v1.2.0
 

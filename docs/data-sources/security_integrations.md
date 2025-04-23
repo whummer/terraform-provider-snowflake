@@ -5,6 +5,8 @@ description: |-
   Data source used to get details of filtered security integrations. Filtering is aligned with the current possibilities for SHOW SECURITY INTEGRATIONS https://docs.snowflake.com/en/sql-reference/sql/show-integrations query (only like is supported). The results of SHOW and DESCRIBE are encapsulated in one output collection security_integrations.
 ---
 
+!> **Sensitive values** This datasource's `describe_output.redirect_uri` field is not marked as sensitive in the provider. Ensure that no personal data, sensitive data, export-controlled data, or other regulated data is entered as metadata when using the provider. If you use one of these fields, they may be present in logs, so ensure that the provider logs are properly restricted. For more information, see [Sensitive values limitations](../#sensitive-values-limitations) and [Metadata fields in Snowflake](https://docs.snowflake.com/en/sql-reference/metadata).
+
 # snowflake_security_integrations (Data Source)
 
 Data source used to get details of filtered security integrations. Filtering is aligned with the current possibilities for [SHOW SECURITY INTEGRATIONS](https://docs.snowflake.com/en/sql-reference/sql/show-integrations) query (only `like` is supported). The results of SHOW and DESCRIBE are encapsulated in one output collection `security_integrations`.
@@ -125,14 +127,12 @@ Read-Only:
 - `oauth_allowed_token_endpoints` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_allowed_token_endpoints))
 - `oauth_authorization_endpoint` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_authorization_endpoint))
 - `oauth_client_auth_method` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_client_auth_method))
-- `oauth_client_id` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_client_id))
 - `oauth_client_rsa_public_key_2_fp` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_client_rsa_public_key_2_fp))
 - `oauth_client_rsa_public_key_fp` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_client_rsa_public_key_fp))
 - `oauth_client_type` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_client_type))
 - `oauth_enforce_pkce` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_enforce_pkce))
 - `oauth_grant` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_grant))
 - `oauth_issue_refresh_tokens` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_issue_refresh_tokens))
-- `oauth_redirect_uri` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_redirect_uri))
 - `oauth_refresh_token_validity` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_refresh_token_validity))
 - `oauth_token_endpoint` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_token_endpoint))
 - `oauth_use_secondary_roles` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--oauth_use_secondary_roles))
@@ -151,10 +151,8 @@ Read-Only:
 - `saml2_snowflake_acs_url` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--saml2_snowflake_acs_url))
 - `saml2_snowflake_issuer_url` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--saml2_snowflake_issuer_url))
 - `saml2_snowflake_metadata` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--saml2_snowflake_metadata))
-- `saml2_snowflake_x509_cert` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--saml2_snowflake_x509_cert))
 - `saml2_sp_initiated_login_page_label` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--saml2_sp_initiated_login_page_label))
 - `saml2_sso_url` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--saml2_sso_url))
-- `saml2_x509_cert` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--saml2_x509_cert))
 - `sync_password` (List of Object) (see [below for nested schema](#nestedobjatt--security_integrations--describe_output--sync_password))
 
 <a id="nestedobjatt--security_integrations--describe_output--allowed_email_patterns"></a>
@@ -432,17 +430,6 @@ Read-Only:
 - `value` (String)
 
 
-<a id="nestedobjatt--security_integrations--describe_output--oauth_client_id"></a>
-### Nested Schema for `security_integrations.describe_output.oauth_client_id`
-
-Read-Only:
-
-- `default` (String)
-- `name` (String)
-- `type` (String)
-- `value` (String)
-
-
 <a id="nestedobjatt--security_integrations--describe_output--oauth_client_rsa_public_key_2_fp"></a>
 ### Nested Schema for `security_integrations.describe_output.oauth_client_rsa_public_key_2_fp`
 
@@ -500,17 +487,6 @@ Read-Only:
 
 <a id="nestedobjatt--security_integrations--describe_output--oauth_issue_refresh_tokens"></a>
 ### Nested Schema for `security_integrations.describe_output.oauth_issue_refresh_tokens`
-
-Read-Only:
-
-- `default` (String)
-- `name` (String)
-- `type` (String)
-- `value` (String)
-
-
-<a id="nestedobjatt--security_integrations--describe_output--oauth_redirect_uri"></a>
-### Nested Schema for `security_integrations.describe_output.oauth_redirect_uri`
 
 Read-Only:
 
@@ -718,17 +694,6 @@ Read-Only:
 - `value` (String)
 
 
-<a id="nestedobjatt--security_integrations--describe_output--saml2_snowflake_x509_cert"></a>
-### Nested Schema for `security_integrations.describe_output.saml2_snowflake_x509_cert`
-
-Read-Only:
-
-- `default` (String)
-- `name` (String)
-- `type` (String)
-- `value` (String)
-
-
 <a id="nestedobjatt--security_integrations--describe_output--saml2_sp_initiated_login_page_label"></a>
 ### Nested Schema for `security_integrations.describe_output.saml2_sp_initiated_login_page_label`
 
@@ -742,17 +707,6 @@ Read-Only:
 
 <a id="nestedobjatt--security_integrations--describe_output--saml2_sso_url"></a>
 ### Nested Schema for `security_integrations.describe_output.saml2_sso_url`
-
-Read-Only:
-
-- `default` (String)
-- `name` (String)
-- `type` (String)
-- `value` (String)
-
-
-<a id="nestedobjatt--security_integrations--describe_output--saml2_x509_cert"></a>
-### Nested Schema for `security_integrations.describe_output.saml2_x509_cert`
 
 Read-Only:
 

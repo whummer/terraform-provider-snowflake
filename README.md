@@ -1,10 +1,16 @@
+## Support
+
+For official support and urgent, production-impacting issues, please [contact Snowflake Support](https://community.snowflake.com/s/article/How-To-Submit-a-Support-Case-in-Snowflake-Lodge).
+
+> ⚠️ **Keep in mind** that the official support starts with the [v2.0.0](https://registry.terraform.io/providers/snowflakedb/snowflake/2.0.0) for stable resources only. All previous versions and preview resources are not officially supported.
+
+Please follow [creating issues guidelines](CREATING_ISSUES.md), [FAQ](FAQ.md), and [known issues](KNOWN_ISSUES.md) before submitting an issue on GitHub or directly to Snowflake Support.
+
 # Snowflake Terraform Provider
 
 > ⚠️ **Please note**: If you believe you have found a security issue, _please responsibly disclose_ by contacting us at [triage-terraformprovider-dl@snowflake.com](mailto:triage-terraformprovider-dl@snowflake.com).
 
-> ⚠️ **Disclaimer**: The project is in v1 version, but some features are in preview. Such resources and data sources are considered preview features in the provider, regardless of their state in Snowflake. We do not guarantee their stability. They will be reworked and marked as a stable feature in future releases. Breaking changes in these features are expected, even without bumping the major version. They are disabled by default. To use them, add the relevant feature name to `preview_features_enabled` field in the [provider configuration](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs#schema). The list of preview features is available below. Please always refer to the [Getting Help](https://github.com/snowflakedb/terraform-provider-snowflake?tab=readme-ov-file#getting-help) section in our Github repo to best determine how to get help for your questions.
->
-> Keep in mind that V1 does not mean we have an official Snowflake support. Please follow [creating issues guidelines](https://github.com/snowflakedb/terraform-provider-snowflake/blob/main/CREATING_ISSUES.md).
+> ⚠️ **Disclaimer**: The project is in GA version, but some features are in preview. Such resources and data sources are considered preview features in the provider, regardless of their state in Snowflake. We do not guarantee their stability. They will be reworked and marked as a stable feature in future releases. Breaking changes in these features are expected, even without bumping the major version. They are disabled by default. To use them, add the relevant feature name to `preview_features_enabled` field in the [provider configuration](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs#schema). The list of preview features is available below. Please always refer to the [Getting Help](https://github.com/snowflakedb/terraform-provider-snowflake?tab=readme-ov-file#getting-help) section in our Github repo to best determine how to get help for your questions.
 
 ----
 
@@ -17,6 +23,7 @@ This is a terraform provider for managing [Snowflake](https://www.snowflake.com/
 * [Snowflake Terraform Provider](#snowflake-terraform-provider)
   * [Table of contents](#table-of-contents)
   * [Getting started](#getting-started)
+  * [Supported Architectures](#supported-architectures)
   * [Migration guide](#migration-guide)
   * [Roadmap](#roadmap)
   * [Getting Help](#getting-help)
@@ -65,6 +72,22 @@ For more information on provider configuration see the [provider docs on the Ter
 Don't forget to run `terraform init` and you're ready to go! 🚀
 
 Start browsing the [registry docs](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs) to find resources and data sources to use.
+
+## Supported Architectures
+
+We have compiled a list to clarify which binaries are officially supported and which are provided additionally but not officially supported.
+The lists are based on what the underlying [gosnowflake driver](https://github.com/snowflakedb/gosnowflake) supports and what [HashiCorp recommends for Terraform providers](https://developer.hashicorp.com/terraform/registry/providers/os-arch).
+
+The Snowflake Terraform provider supports the following architectures:
+- Windows: amd64
+- Linux: amd64 and arm64
+- Darwin: amd64 and arm64
+
+We also provide additional configurations, but they are not officially supported, and we do not prioritize fixes for them:
+- Windows: arm64 and 386
+- Linux: 386
+- Darwin: 386
+- Freebsd: any architecture
 
 ## Migration guide
 

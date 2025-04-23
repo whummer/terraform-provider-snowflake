@@ -5,6 +5,8 @@ description: |-
   Resource used to manage oauth security integration for custom clients objects. For more information, check security integrations documentation https://docs.snowflake.com/en/sql-reference/sql/create-security-integration-oauth-snowflake.
 ---
 
+!> **Sensitive values** This resource's `oauth_redirect_uri` and `describe_output.oauth_redirect_uri` fields are not marked as sensitive in the provider. Ensure that no personal data, sensitive data, export-controlled data, or other regulated data is entered as metadata when using the provider. If you use one of these fields, they may be present in logs, so ensure that the provider logs are properly restricted. For more information, see [Sensitive values limitations](../#sensitive-values-limitations) and [Metadata fields in Snowflake](https://docs.snowflake.com/en/sql-reference/metadata).
+
 !> **Note** Setting a network policy with lowercase letters does not work correctly in Snowflake (see [issue](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3229)). As a workaround, set the network policy with uppercase letters only, or use [execute](./execute) with network policy ID wrapped in `'`.
 
 !> **Note** The provider does not detect external changes on security integration type. In this case, remove the integration of wrong type manually with `terraform destroy` and recreate the resource. It will be addressed in the future.
@@ -54,7 +56,7 @@ resource "snowflake_oauth_integration_for_custom_clients" "complete" {
 
 - `name` (String) Specifies the name of the OAuth integration. This name follows the rules for Object Identifiers. The name should be unique among security integrations in your account. Due to technical limitations (read more [here](../guides/identifiers_rework_design_decisions#known-limitations-and-identifier-recommendations)), avoid using the following characters: `|`, `.`, `"`.
 - `oauth_client_type` (String) Specifies the type of client being registered. Snowflake supports both confidential and public clients. Valid options are: `PUBLIC` | `CONFIDENTIAL`.
-- `oauth_redirect_uri` (String) Specifies the client URI. After a user is authenticated, the web browser is redirected to this URI.
+- `oauth_redirect_uri` (String, Sensitive) Specifies the client URI. After a user is authenticated, the web browser is redirected to this URI.
 
 ### Optional
 
@@ -104,13 +106,11 @@ Read-Only:
 - `oauth_allowed_authorization_endpoints` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_allowed_authorization_endpoints))
 - `oauth_allowed_token_endpoints` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_allowed_token_endpoints))
 - `oauth_authorization_endpoint` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_authorization_endpoint))
-- `oauth_client_id` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_client_id))
 - `oauth_client_rsa_public_key_2_fp` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_client_rsa_public_key_2_fp))
 - `oauth_client_rsa_public_key_fp` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_client_rsa_public_key_fp))
 - `oauth_client_type` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_client_type))
 - `oauth_enforce_pkce` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_enforce_pkce))
 - `oauth_issue_refresh_tokens` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_issue_refresh_tokens))
-- `oauth_redirect_uri` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_redirect_uri))
 - `oauth_refresh_token_validity` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_refresh_token_validity))
 - `oauth_token_endpoint` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_token_endpoint))
 - `oauth_use_secondary_roles` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_use_secondary_roles))
@@ -204,17 +204,6 @@ Read-Only:
 - `value` (String)
 
 
-<a id="nestedobjatt--describe_output--oauth_client_id"></a>
-### Nested Schema for `describe_output.oauth_client_id`
-
-Read-Only:
-
-- `default` (String)
-- `name` (String)
-- `type` (String)
-- `value` (String)
-
-
 <a id="nestedobjatt--describe_output--oauth_client_rsa_public_key_2_fp"></a>
 ### Nested Schema for `describe_output.oauth_client_rsa_public_key_2_fp`
 
@@ -261,17 +250,6 @@ Read-Only:
 
 <a id="nestedobjatt--describe_output--oauth_issue_refresh_tokens"></a>
 ### Nested Schema for `describe_output.oauth_issue_refresh_tokens`
-
-Read-Only:
-
-- `default` (String)
-- `name` (String)
-- `type` (String)
-- `value` (String)
-
-
-<a id="nestedobjatt--describe_output--oauth_redirect_uri"></a>
-### Nested Schema for `describe_output.oauth_redirect_uri`
 
 Read-Only:
 
