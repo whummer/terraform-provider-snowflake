@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/snowflakedb/terraform-provider-snowflake/compare/v1.2.0...v1.2.1) (2025-04-22)
+
+
+### 🔧 **Misc**
+
+* Bump versioning ([#3589](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3589)) ([3fa737a](https://github.com/snowflakedb/terraform-provider-snowflake/commit/3fa737a45ca1d58d9d984b0703f03da5cab2e3d1))
+
 ## [1.2.0](https://github.com/snowflakedb/terraform-provider-snowflake/compare/v1.1.0...v1.2.0) (2025-04-22)
 
 
