@@ -102,7 +102,6 @@ Read-Only:
 - `oauth_allowed_scopes` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_allowed_scopes))
 - `oauth_authorization_endpoint` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_authorization_endpoint))
 - `oauth_client_auth_method` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_client_auth_method))
-- `oauth_client_id` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_client_id))
 - `oauth_grant` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_grant))
 - `oauth_refresh_token_validity` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_refresh_token_validity))
 - `oauth_token_endpoint` (List of Object) (see [below for nested schema](#nestedobjatt--describe_output--oauth_token_endpoint))
@@ -176,17 +175,6 @@ Read-Only:
 
 <a id="nestedobjatt--describe_output--oauth_client_auth_method"></a>
 ### Nested Schema for `describe_output.oauth_client_auth_method`
-
-Read-Only:
-
-- `default` (String)
-- `name` (String)
-- `type` (String)
-- `value` (String)
-
-
-<a id="nestedobjatt--describe_output--oauth_client_id"></a>
-### Nested Schema for `describe_output.oauth_client_id`
 
 Read-Only:
 
