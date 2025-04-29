@@ -35,7 +35,10 @@ func TestAcc_SecurityIntegrations_MultipleTypes(t *testing.T) {
 	validUrl := "https://example.com"
 	role := snowflakeroles.GenericScimProvisioner
 
-	saml2Model := model.Saml2SecurityIntegration("test", idOne.Name(), issuer, string(sdk.Saml2SecurityIntegrationSaml2ProviderCustom), validUrl, cert)
+	temporaryVariableName := "saml2_x509_cert"
+	temporaryVariableDefinition, configVariables := accconfig.TempSecretStringVariableConfig(temporaryVariableName, cert)
+
+	saml2Model := model.Saml2SecurityIntegrationVar("test", idOne.Name(), issuer, string(sdk.Saml2SecurityIntegrationSaml2ProviderCustom), validUrl, temporaryVariableName)
 	scimModel := model.ScimSecurityIntegration("test", idTwo.Name(), true, role.Name(), string(sdk.ScimSecurityIntegrationScimClientGeneric))
 	securityIntegrationsModel := datasourcemodel.SecurityIntegrations("test").
 		WithLike(prefix+"%").
@@ -49,7 +52,8 @@ func TestAcc_SecurityIntegrations_MultipleTypes(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: accconfig.FromModels(t, scimModel, saml2Model, securityIntegrationsModel),
+				Config:          accconfig.FromModels(t, scimModel, saml2Model, securityIntegrationsModel) + temporaryVariableDefinition,
+				ConfigVariables: configVariables,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(securityIntegrationsModel.DatasourceReference(), "security_integrations.#", "2"),
 
@@ -516,8 +520,11 @@ func TestAcc_SecurityIntegrations_Saml2(t *testing.T) {
 	issuerURL := acc.TestClient().Context.IssuerURL(t)
 	comment := random.Comment()
 
+	temporaryVariableName := "saml2_x509_cert"
+	temporaryVariableDefinition, configVariables := accconfig.TempSecretStringVariableConfig(temporaryVariableName, cert)
+
 	// TODO(SNOW-1479617): set saml2_snowflake_x509_cert
-	resourceModel := model.Saml2SecurityIntegration("test", id.Name(), issuer, string(sdk.Saml2SecurityIntegrationSaml2ProviderCustom), validUrl, cert).
+	resourceModel := model.Saml2SecurityIntegrationVar("test", id.Name(), issuer, string(sdk.Saml2SecurityIntegrationSaml2ProviderCustom), validUrl, temporaryVariableName).
 		WithComment(comment).
 		WithEnabled(datasources.BooleanTrue).
 		WithAllowedEmailPatterns("^(.+dev)@example.com$").
@@ -547,7 +554,8 @@ func TestAcc_SecurityIntegrations_Saml2(t *testing.T) {
 		CheckDestroy: acc.CheckDestroy(t, resources.Saml2SecurityIntegration),
 		Steps: []resource.TestStep{
 			{
-				Config: accconfig.FromModels(t, resourceModel, securityIntegrationsModel),
+				Config:          accconfig.FromModels(t, resourceModel, securityIntegrationsModel) + temporaryVariableDefinition,
+				ConfigVariables: configVariables,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(securityIntegrationsModel.DatasourceReference(), "security_integrations.#", "1"),
 
@@ -582,7 +590,8 @@ func TestAcc_SecurityIntegrations_Saml2(t *testing.T) {
 				),
 			},
 			{
-				Config: accconfig.FromModels(t, resourceModel, securityIntegrationsModelWithoutDescribe),
+				Config:          accconfig.FromModels(t, resourceModel, securityIntegrationsModelWithoutDescribe) + temporaryVariableDefinition,
+				ConfigVariables: configVariables,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(securityIntegrationsModelWithoutDescribe.DatasourceReference(), "security_integrations.#", "1"),
 
