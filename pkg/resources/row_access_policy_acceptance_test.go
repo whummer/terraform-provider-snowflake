@@ -57,14 +57,14 @@ func TestAcc_RowAccessPolicy(t *testing.T) {
 		},
 	}
 
-	policyModel := model.RowAccessPolicy("test", argument, body, id.DatabaseName(), id.Name(), id.SchemaName()).
+	policyModel := model.RowAccessPolicy("test", id.DatabaseName(), id.SchemaName(), id.Name(), argument, body).
 		WithComment(comment)
-	changedPolicyModel := model.RowAccessPolicy("test", argument, changedBody, id.DatabaseName(), id.Name(), id.SchemaName()).
+	changedPolicyModel := model.RowAccessPolicy("test", id.DatabaseName(), id.SchemaName(), id.Name(), argument, changedBody).
 		WithComment(newComment)
-	changedArgumentPolicyModel := model.RowAccessPolicy("test", argument, changedBody, id.DatabaseName(), id.Name(), id.SchemaName()).
+	changedArgumentPolicyModel := model.RowAccessPolicy("test", id.DatabaseName(), id.SchemaName(), id.Name(), argument, changedBody).
 		WithComment(newComment).
 		WithArgument(changedArgument)
-	noCommentPolicyModel := model.RowAccessPolicy("test", argument, changedBody, id.DatabaseName(), id.Name(), id.SchemaName()).
+	noCommentPolicyModel := model.RowAccessPolicy("test", id.DatabaseName(), id.SchemaName(), id.Name(), argument, changedBody).
 		WithComment("").
 		WithArgument(changedArgument)
 
@@ -217,12 +217,12 @@ func TestAcc_RowAccessPolicy_Issue2053(t *testing.T) {
 
 	id := acc.TestClient().Ids.RandomSchemaObjectIdentifier()
 	body := "case when current_role() in ('ANALYST') then true else false end"
-	policyModel := model.RowAccessPolicy("test", []sdk.TableColumnSignature{
+	policyModel := model.RowAccessPolicy("test", id.DatabaseName(), id.SchemaName(), id.Name(), []sdk.TableColumnSignature{
 		{
 			Name: "A",
 			Type: testdatatypes.DataTypeVarchar,
 		},
-	}, body, id.DatabaseName(), id.Name(), id.SchemaName())
+	}, body)
 
 	resource.Test(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
@@ -247,7 +247,7 @@ func TestAcc_RowAccessPolicy_Issue2053(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				PreConfig:         func() { acc.UnsetConfigPathEnv(t) },
+				PreConfig:         func() { acc.SetLegacyConfigPathEnv(t) },
 				ExternalProviders: acc.ExternalProviderWithExactVersion("1.0.0"),
 				Config:            accconfig.FromModels(t, policyModel),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -290,18 +290,18 @@ func TestAcc_RowAccessPolicy_Rename(t *testing.T) {
 	newId := acc.TestClient().Ids.RandomSchemaObjectIdentifier()
 	body := "case when current_role() in ('ANALYST') then true else false end"
 
-	policyModel := model.RowAccessPolicy("test", []sdk.TableColumnSignature{
+	policyModel := model.RowAccessPolicy("test", id.DatabaseName(), id.SchemaName(), id.Name(), []sdk.TableColumnSignature{
 		{
 			Name: "a",
 			Type: testdatatypes.DataTypeVarchar,
 		},
-	}, body, id.DatabaseName(), id.Name(), id.SchemaName())
-	renamedPolicyModel := model.RowAccessPolicy("test", []sdk.TableColumnSignature{
+	}, body)
+	renamedPolicyModel := model.RowAccessPolicy("test", newId.DatabaseName(), newId.SchemaName(), newId.Name(), []sdk.TableColumnSignature{
 		{
 			Name: "a",
 			Type: testdatatypes.DataTypeVarchar,
 		},
-	}, body, newId.DatabaseName(), newId.Name(), newId.SchemaName())
+	}, body)
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acc.TestAccProtoV6ProviderFactories,
@@ -384,12 +384,12 @@ func TestAcc_RowAccessPolicy_DataTypeAliases(t *testing.T) {
 
 	id := acc.TestClient().Ids.RandomSchemaObjectIdentifier()
 	body := "case when current_role() in ('ANALYST') then true else false end"
-	policyModel := model.RowAccessPolicy("test", []sdk.TableColumnSignature{
+	policyModel := model.RowAccessPolicy("test", id.DatabaseName(), id.SchemaName(), id.Name(), []sdk.TableColumnSignature{
 		{
 			Name: "A",
 			Type: testdatatypes.DataTypeText,
 		},
-	}, body, id.DatabaseName(), id.Name(), id.SchemaName())
+	}, body)
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acc.TestAccProtoV6ProviderFactories,
@@ -421,7 +421,7 @@ func TestAcc_RowAccessPolicy_migrateFromVersion_0_95_0_LowercaseArgName(t *testi
 
 	id := acc.TestClient().Ids.RandomSchemaObjectIdentifier()
 	body := "case when current_role() in ('ANALYST') then true else false end"
-	policyModel := model.RowAccessPolicy("test", []sdk.TableColumnSignature{
+	policyModel := model.RowAccessPolicy("test", id.DatabaseName(), id.SchemaName(), id.Name(), []sdk.TableColumnSignature{
 		{
 			Name: "A",
 			Type: testdatatypes.DataTypeVarchar,
@@ -430,7 +430,7 @@ func TestAcc_RowAccessPolicy_migrateFromVersion_0_95_0_LowercaseArgName(t *testi
 			Name: "b",
 			Type: testdatatypes.DataTypeVarchar,
 		},
-	}, body, id.DatabaseName(), id.Name(), id.SchemaName())
+	}, body)
 
 	resource.Test(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
@@ -460,7 +460,7 @@ func TestAcc_RowAccessPolicy_migrateFromVersion_0_95_0_LowercaseArgName(t *testi
 				),
 			},
 			{
-				PreConfig:         func() { acc.UnsetConfigPathEnv(t) },
+				PreConfig:         func() { acc.SetLegacyConfigPathEnv(t) },
 				ExternalProviders: acc.ExternalProviderWithExactVersion("1.0.0"),
 				Config:            accconfig.FromModels(t, policyModel),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -493,7 +493,7 @@ func TestAcc_RowAccessPolicy_migrateFromVersion_0_95_0_UppercaseArgName(t *testi
 
 	id := acc.TestClient().Ids.RandomSchemaObjectIdentifier()
 	body := "case when current_role() in ('ANALYST') then true else false end"
-	policyModel := model.RowAccessPolicy("test", []sdk.TableColumnSignature{
+	policyModel := model.RowAccessPolicy("test", id.DatabaseName(), id.SchemaName(), id.Name(), []sdk.TableColumnSignature{
 		{
 			Name: "A",
 			Type: testdatatypes.DataTypeVarchar,
@@ -502,7 +502,7 @@ func TestAcc_RowAccessPolicy_migrateFromVersion_0_95_0_UppercaseArgName(t *testi
 			Name: "B",
 			Type: testdatatypes.DataTypeVarchar,
 		},
-	}, body, id.DatabaseName(), id.Name(), id.SchemaName())
+	}, body)
 
 	resource.Test(t, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
@@ -532,7 +532,7 @@ func TestAcc_RowAccessPolicy_migrateFromVersion_0_95_0_UppercaseArgName(t *testi
 				),
 			},
 			{
-				PreConfig:         func() { acc.UnsetConfigPathEnv(t) },
+				PreConfig:         func() { acc.SetLegacyConfigPathEnv(t) },
 				ExternalProviders: acc.ExternalProviderWithExactVersion("1.0.0"),
 				Config:            accconfig.FromModels(t, policyModel),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -601,6 +601,7 @@ func TestAcc_RowAccessPolicy_migrateToV2_0_0(t *testing.T) {
 		PreCheck: func() { acc.TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
+				PreConfig:         func() { acc.SetLegacyConfigPathEnv(t) },
 				ExternalProviders: acc.ExternalProviderWithExactVersion("1.2.1"),
 				Config:            accconfig.FromModels(t, policyModel) + temporaryVariableDefinition,
 				ConfigVariables:   commonVariables,
@@ -612,6 +613,7 @@ func TestAcc_RowAccessPolicy_migrateToV2_0_0(t *testing.T) {
 				),
 			},
 			{
+				PreConfig:                func() { acc.UnsetConfigPathEnv(t) },
 				ProtoV6ProviderFactories: acc.TestAccProtoV6ProviderFactories,
 				Config:                   accconfig.FromModels(t, policyModel) + temporaryVariableDefinition,
 				ConfigVariables:          commonVariables,
@@ -665,6 +667,7 @@ func TestAcc_RowAccessPolicy_migrateToV2_0_0_nonDefaultInConfig(t *testing.T) {
 		PreCheck: func() { acc.TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
+				PreConfig:         func() { acc.SetLegacyConfigPathEnv(t) },
 				ExternalProviders: acc.ExternalProviderWithExactVersion("1.2.1"),
 				Config:            accconfig.FromModels(t, policyModel) + temporaryVariableDefinition,
 				ConfigVariables:   commonVariables,
@@ -678,6 +681,7 @@ func TestAcc_RowAccessPolicy_migrateToV2_0_0_nonDefaultInConfig(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
+				PreConfig:                func() { acc.UnsetConfigPathEnv(t) },
 				ProtoV6ProviderFactories: acc.TestAccProtoV6ProviderFactories,
 				Config:                   accconfig.FromModels(t, policyModel) + temporaryVariableDefinition,
 				ConfigVariables:          commonVariables,

@@ -18,6 +18,50 @@ across different versions.
 > [!TIP]
 > If you're still using the `Snowflake-Labs/snowflake` source, see [Upgrading from Snowflake-Labs Provider](./SNOWFLAKEDB_MIGRATION.md) to upgrade to the snowflakedb namespace.
 
+## v2.0.0 ➞ v2.0.1
+
+### *(bugfix)* Fixed `snowflake_tag_association` resource
+
+The `snowflake_tag_association` resource was crashing when performing the update operation (e.g., because the `tag_value` was changed)
+for objects that are created on schema level. This was fixed, and now you can create tag associations for objects that are created on schema level.
+
+Reference: [#3622](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3622).
+
+### *(bugfix)* Added missing `DISABLE_USER_PRIVILEGE_GRANTS` account parameter
+
+As part of the [2025_02 Bundle](https://docs.snowflake.com/en/release-notes/bcr-bundles/2025_02_bundle), support for User Based Access Control (UBAC) will be added ([BCR-1924](https://docs.snowflake.com/en/release-notes/bcr-bundles/2025_02/bcr-1924)).
+It can be disabled by setting the `DISABLE_USER_PRIVILEGE_GRANTS` parameter to `true`.
+This version adds the support for this parameter in the `snowflake_account_parameter` resource.
+
+Reference: [#3639](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3639).
+
+### *(bugfix)* Imports propagation to Snowflake for all `snowflake_procedure_*` resources
+
+The `snowflake_procedure_python`, `snowflake_procedure_scala`, and `snowflake_procedure_java` resources were not propagating changes to `imports` set to Snowflake.
+There is no `ALTER` to update the imports post-creation, so changes require dropping and recreating the given procedure.
+
+No action is needed.
+
+Reference: [#3401](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3401).
+
+### *(bugfix)* Fixed permadiff issue with the `network_policy` attribute in all user resources
+
+Using `snowflake_network_policy.my_policy.fully_qualified_name` directly as `network_policy` input for `snowflake_user`, `snowflake_service_user`, and `snowflake_legacy_service_user` resources could result in a permadiff (like ` ~ network_policy = "NETWORK_POLICY_ID" -> "\"NETWORK_POLICY_ID\""`).
+This version adds appropriate validation and diff suppression to `network_policy` attribute, so such permadiffs are avoided.
+
+No action is needed.
+
+Reference: [#3655](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3655).
+
+### *(bugfix)* Fixed snowflake_grant_database_role resource
+
+The `2025_02` Snowflake BCR enables granting database roles directly to users.  
+This caused issues in the provider, leading to `Provider produced inconsistent result after apply` errors  
+when a database role was granted to a user. This version resolves the issue.
+No configuration changes are necessary.
+
+References: [#3629](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3629)
+
 ## v1.2.1 ➞ v2.0.0
 
 ### Supported architectures
@@ -110,14 +154,15 @@ The following table represents fields removed from resources. They were removed 
 on marking data as sensitive in objects or collections ([Terraform issue reference](https://github.com/hashicorp/terraform/issues/28222)). Removal of computed output fields may have an impact on detecting
 external changes (on the Snowflake side) for (usually) top-level fields they were referring to (e.g. `describe_output.oauth_client_id` -> `oauth_client_id`).
 
+> Note: We may bring those fields back after exploring a better approaches (e.g., by using the new [Terraform Plugin Framework](https://developer.hashicorp.com/terraform/plugin/framework)), as currently, our options with the [Terraform SDKv2](https://developer.hashicorp.com/terraform/plugin/sdkv2) are limited in that regard.
+
 | Resource name                                                            | Removed fields                                                                                                             |
 |--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
-| `snowflake_saml2_integration`                                            | `describe_output.saml2_x509_cert`, `describe_output.saml2_snowflake_x509_cert`                                             |
 | `snowflake_api_authentication_integration_with_authorization_code_grant` | `describe_output.oauth_client_id`                                                                                          |
 | `snowflake_api_authentication_integration_with_client_credentials`       | `describe_output.oauth_client_id`                                                                                          |
 | `snowflake_api_authentication_integration_with_jwt_bearer`               | `describe_output.oauth_client_id`                                                                                          |
 | `snowflake_oauth_integration_for_partner_applications`                   | `describe_output.oauth_client_id`, `describe_output.oauth_redirect_uri`                                                    |
-| `snowflake_oauth_integration_for_custom_clients`                         | `describe_output.oauth_redirect_uri`, `describe_output.oauth_redirect_uri`                                                 |
+| `snowflake_oauth_integration_for_custom_clients`                         | `describe_output.oauth_client_id`, `describe_output.oauth_redirect_uri`                                                    |
 | `snowflake_saml2_integration`                                            | `describe_output.saml2_snowflake_x509_cert`, `describe_output.saml2_x509_cert`                                             |
 | `snowflake_security_integrations` (data source)                          | `security_integrations.describe_output.saml2_snowflake_x509_cert`, `security_integrations.describe_output.saml2_x509_cert` |
 | `snowflake_users` (data source)                                          | `users.describe_output.password`                                                                                           |
@@ -1863,7 +1908,24 @@ With this change we introduce the first resources redesigned for the V1. We have
 They are all described in short in the [changes before v1 doc](./v1-preparations/CHANGES_BEFORE_V1.md). Please familiarize yourself with these changes before the upgrade.
 
 ### old grant resources removal
-Following the [announcement](https://github.com/snowflakedb/terraform-provider-snowflake/discussions/2736) we have removed the old grant resources. The two resources [snowflake_role_ownership_grant](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/role_ownership_grant) and [snowflake_user_ownership_grant](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/user_ownership_grant) were not listed in the announcement, but they were also marked as deprecated ones. We are removing them too to conclude the grants redesign saga.
+Following the [announcement](https://github.com/snowflakedb/terraform-provider-snowflake/discussions/2736) we have removed the old grant resources.
+The two resources [snowflake_role_ownership_grant](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/role_ownership_grant) and 
+[snowflake_user_ownership_grant](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/user_ownership_grant) were not listed in the announcement,
+but they were also marked as deprecated ones. We are removing them too to conclude the grants redesign saga.
+
+#### Grant resource mappings
+As previous resources had multiple responsibilities within a single entity, we opted to divide them into more specialized resources.
+Because of that, they (mostly) cannot be mapped one to one. To migrate the old grant resources to the new ones, use the following mapping rules:
+- If you are using `shares` field, use the [snowflake_grant_privileges_to_share](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/grant_privileges_to_share) resource.
+- If you are using `roles` field, use the [snowflake_grant_privileges_to_account_role](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/grant_privileges_to_account_role) resource.
+- For OWNERSHIP privilege manipulation, use the dedicated [snowflake_grant_ownership](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/grant_ownership) resource.
+- New grant resources expect fully qualified identifiers (e.g., [grant_privileges_to_account_role](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/grant_privileges_to_account_role#object_name-2) with `object_name`), instead of parts of identifier split between few fields (e.g., [function_grant](https://registry.terraform.io/providers/snowflakedb/snowflake/0.90.0/docs/resources/function_grant#database_name-8) with `database_name`, `schema_name`, `function_name`, and `argument_data_types`). Use `fully_qualified_name` field whenever possible to avoid identifier issues (look [here](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/guides/identifiers_rework_design_decisions#new-computed-fully-qualified-name-field-in-resources)).
+- The `enable_masking_grants` field that could be found, for example, in [masking_policy_grant](https://registry.terraform.io/providers/snowflakedb/snowflake/0.90.0/docs/resources/masking_policy_grant) resource is now "enabled by default" for all new grant resources. In the new resources, there's no way to disable this setting. We left it as a [future topic](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/guides/grants_redesign_design_decisions#future-topics) if such need arises.
+- The `on_all` and `on_future` fields were transformed from [boolean type](https://registry.terraform.io/providers/snowflakedb/snowflake/0.90.0/docs/resources/schema_grant#on_all-9) to [nested object](https://registry.terraform.io/providers/snowflakedb/snowflake/0.90.0/docs/resources/schema_grant#on_all-9). Now, it reflects more the [GRANT PRIVILEGE](https://docs.snowflake.com/en/sql-reference/sql/grant-privilege) documentation.
+- The `revert_ownership_to_role_name` option that was available in the [user_ownership_grant](https://registry.terraform.io/providers/snowflakedb/snowflake/0.90.0/docs/resources/user_ownership_grant#revert_ownership_to_role_name-24) is not supported in the new [grant_ownership](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/grant_ownership) resource, but [we have it in our plans](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/guides/grant_ownership_resource_overview#future-plans) as an improvement.
+
+> Because new resources are more general and promote single responsibility, you may end up with higher resource count than before (at least "under the hood," because new resources are easier to work with `for_each` can be easily generated for different configurations).
+> We plan to improve this topic in the future, as it is a highly requested feature (mostly because resource count is usually a measure used for billing).
 
 ### *(new feature)* Api authentication resources
 Added new api authentication resources, i.e.:
