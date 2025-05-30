@@ -51,14 +51,14 @@ type ServiceFromSpecification struct {
 	from              bool     `ddl:"static" sql:"FROM"`
 	Location          Location `ddl:"parameter,no_quotes,no_equals"`
 	SpecificationFile *string  `ddl:"parameter,single_quotes" sql:"SPECIFICATION_FILE"`
-	Specification     *string  `ddl:"parameter,no_equals" sql:"SPECIFICATION"`
+	Specification     *string  `ddl:"parameter,double_dollar_quotes,no_equals" sql:"SPECIFICATION"`
 }
 
 type ServiceFromSpecificationTemplate struct {
 	from                      bool       `ddl:"static" sql:"FROM"`
 	Location                  Location   `ddl:"parameter,no_quotes,no_equals"`
 	SpecificationTemplateFile *string    `ddl:"parameter,single_quotes" sql:"SPECIFICATION_TEMPLATE_FILE"`
-	SpecificationTemplate     *string    `ddl:"parameter,no_equals" sql:"SPECIFICATION_TEMPLATE"`
+	SpecificationTemplate     *string    `ddl:"parameter,double_dollar_quotes,no_equals" sql:"SPECIFICATION_TEMPLATE"`
 	Using                     []ListItem `ddl:"parameter,parentheses,no_equals" sql:"USING"`
 }
 

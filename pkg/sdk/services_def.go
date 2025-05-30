@@ -54,7 +54,7 @@ var serviceFromSpecificationDef = g.NewQueryStruct("ServiceFromSpecification").
 	SQL("FROM").
 	PredefinedQueryStructField("Location", "Location", g.ParameterOptions().NoQuotes().NoEquals()).
 	OptionalTextAssignment("SPECIFICATION_FILE", g.ParameterOptions().SingleQuotes()).
-	OptionalTextAssignment("SPECIFICATION", g.ParameterOptions().NoEquals()).
+	OptionalTextAssignment("SPECIFICATION", g.ParameterOptions().DoubleDollarQuotes().NoEquals()).
 	WithValidation(g.ExactlyOneValueSet, "SpecificationFile", "Specification").
 	WithValidation(g.ConflictingFields, "Location", "Specification")
 
@@ -62,7 +62,7 @@ var serviceFromSpecificationTemplateDef = g.NewQueryStruct("ServiceFromSpecifica
 	SQL("FROM").
 	PredefinedQueryStructField("Location", "Location", g.ParameterOptions().NoQuotes().NoEquals()).
 	OptionalTextAssignment("SPECIFICATION_TEMPLATE_FILE", g.ParameterOptions().SingleQuotes()).
-	OptionalTextAssignment("SPECIFICATION_TEMPLATE", g.ParameterOptions().NoEquals()).
+	OptionalTextAssignment("SPECIFICATION_TEMPLATE", g.ParameterOptions().DoubleDollarQuotes().NoEquals()).
 	ListAssignment("USING", "ListItem", g.ParameterOptions().NoEquals().Parentheses().Required()).
 	WithValidation(g.ExactlyOneValueSet, "SpecificationTemplateFile", "SpecificationTemplate").
 	WithValidation(g.ConflictingFields, "Location", "SpecificationTemplate")
