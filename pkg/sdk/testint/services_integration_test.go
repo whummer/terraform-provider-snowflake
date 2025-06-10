@@ -16,20 +16,15 @@ func TestInt_Services(t *testing.T) {
 	client := testClient(t)
 	ctx := testContext(t)
 
-	spec := `
-spec:
-  containers:
-  - name: example-container
-    image: /snowflake/images/snowflake_images/exampleimage:latest
-`
-	specTemplate := `
-spec:
-  containers:
-  - name: {{ container_name }}
-    image: /snowflake/images/snowflake_images/exampleimage:latest
-`
+	spec := testClientHelper().Service.SampleSpecWithContainerName(t, "text-example-original")
+
+	changedSpec := testClientHelper().Service.SampleSpecWithContainerName(t, "text-example-changed")
+	specTemplate := testClientHelper().Service.SampleSpecWithContainerName(t, "template-example-{{ container_name }}")
 	specTemplateUsing := []sdk.ListItem{
-		{Key: "container_name", Value: `'example'`},
+		{Key: "container_name", Value: `'original'`},
+	}
+	specTemplateUsingChanged := []sdk.ListItem{
+		{Key: "container_name", Value: `'changed'`},
 	}
 	// TODO(SNOW-2129575): We set up a separate database and schema with capitalized ids. Remove this after fix on snowflake side.
 	db, dbCleanup := testClientHelper().Database.CreateDatabaseWithParametersSet(t)
@@ -40,6 +35,7 @@ spec:
 
 	stage, stageCleanup := testClientHelper().Stage.CreateStageInSchema(t, schema.ID())
 	t.Cleanup(stageCleanup)
+	location := sdk.NewStageLocation(stage.ID(), "")
 
 	revertParameter := testClientHelper().Parameter.UpdateAccountParameterTemporarily(t, sdk.AccountParameterPythonProfilerTargetStage, stage.ID().FullyQualifiedName())
 	t.Cleanup(revertParameter)
@@ -213,7 +209,6 @@ spec:
 
 	t.Run("create - from specification template on stage", func(t *testing.T) {
 		id := testClientHelper().Ids.RandomSchemaObjectIdentifierInSchema(schema.ID())
-		location := sdk.NewStageLocation(stage.ID(), "")
 		request := sdk.NewCreateServiceRequest(id, computePool.ID()).
 			WithFromSpecificationTemplate(*sdk.NewServiceFromSpecificationTemplateRequest(specTemplateUsing).WithLocation(location).WithSpecificationTemplateFile(specTemplateFileName))
 
@@ -306,6 +301,59 @@ spec:
 			HasIsUpgrading(false).
 			HasNoManagingObjectDomain().
 			HasNoManagingObjectName(),
+		)
+	})
+
+	t.Run("alter: change spec", func(t *testing.T) {
+		service, serviceCleanup := testClientHelper().Service.CreateWithId(t, computePool.ID(), testClientHelper().Ids.RandomSchemaObjectIdentifierInSchema(schema.ID()))
+		t.Cleanup(serviceCleanup)
+
+		// specification
+		err := client.Services.Alter(ctx, sdk.NewAlterServiceRequest(service.ID()).WithFromSpecification(*sdk.NewServiceFromSpecificationRequest().WithSpecification(changedSpec)))
+		require.NoError(t, err)
+
+		service, err = client.Services.ShowByID(ctx, service.ID())
+		require.NoError(t, err)
+
+		assertThatObject(t, objectassert.ServiceDetails(t, service.ID()).
+			HasName(service.ID().Name()).
+			HasSpecThatContains("text-example-changed"),
+		)
+
+		// specification on stage
+		err = client.Services.Alter(ctx, sdk.NewAlterServiceRequest(service.ID()).WithFromSpecification(*sdk.NewServiceFromSpecificationRequest().WithLocation(location).WithSpecificationFile(specFileName)))
+		require.NoError(t, err)
+
+		service, err = client.Services.ShowByID(ctx, service.ID())
+		require.NoError(t, err)
+
+		assertThatObject(t, objectassert.ServiceDetails(t, service.ID()).
+			HasName(service.ID().Name()).
+			HasSpecThatContains("text-example-original"),
+		)
+
+		// specification template
+		err = client.Services.Alter(ctx, sdk.NewAlterServiceRequest(service.ID()).WithFromSpecificationTemplate(*sdk.NewServiceFromSpecificationTemplateRequest(specTemplateUsing).WithSpecificationTemplate(specTemplate)))
+		require.NoError(t, err)
+
+		service, err = client.Services.ShowByID(ctx, service.ID())
+		require.NoError(t, err)
+
+		assertThatObject(t, objectassert.ServiceDetails(t, service.ID()).
+			HasName(service.ID().Name()).
+			HasSpecThatContains("template-example-original"),
+		)
+
+		// specification template on stage
+		err = client.Services.Alter(ctx, sdk.NewAlterServiceRequest(service.ID()).WithFromSpecificationTemplate(*sdk.NewServiceFromSpecificationTemplateRequest(specTemplateUsingChanged).WithLocation(location).WithSpecificationTemplateFile(specTemplateFileName)))
+		require.NoError(t, err)
+
+		service, err = client.Services.ShowByID(ctx, service.ID())
+		require.NoError(t, err)
+
+		assertThatObject(t, objectassert.ServiceDetails(t, service.ID()).
+			HasName(service.ID().Name()).
+			HasSpecThatContains("template-example-changed"),
 		)
 	})
 
@@ -435,7 +483,7 @@ spec:
 			HasSchemaName(service.ID().SchemaName()).
 			HasOwner(snowflakeroles.Accountadmin.Name()).
 			HasComputePool(computePool.ID()).
-			HasSpecNotEmpty().
+			HasSpecThatContains("snowflake/images/snowflake_images/exampleimage:latest").
 			HasDnsNameNotEmpty().
 			HasCurrentInstances(1).
 			HasTargetInstances(1).
