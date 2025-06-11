@@ -1,19 +1,22 @@
 ---
-page_title: "snowflake_service Resource - terraform-provider-snowflake"
+page_title: "snowflake_job_service Resource - terraform-provider-snowflake"
 subcategory: "Preview"
 description: |-
-  Resource used to manage services. For more information, check services documentation https://docs.snowflake.com/en/sql-reference/sql/create-service. A long-running service is like a web service that does not end automatically. After you create a service, Snowflake manages the running service. For example, if a service container stops, for whatever reason, Snowflake restarts that container so the service runs uninterrupted. See Working with services https://docs.snowflake.com/en/developer-guide/snowpark-container-services/working-with-services developer guide for more details.
+  Resource used to manage job services. For more information, check services documentation https://docs.snowflake.com/en/sql-reference/sql/execute-job-service. Executes a Snowpark Container Services service as a job. A service, created using CREATE SERVICE, is long-running and you must explicitly stop it when it is no longer needed. On the other hand, a job, created using EXECUTE JOB SERVICE (with ASYNC=TRUE in this resource), returns immediately while the job is running. See Working with services https://docs.snowflake.com/en/developer-guide/snowpark-container-services/working-with-services developer guide for more details.
 ---
 
 !> **Caution: Preview Feature** This feature is considered a preview feature in the provider, regardless of the state of the resource in Snowflake. We do not guarantee its stability. It will be reworked and marked as a stable feature in future releases. Breaking changes are expected, even without bumping the major version. To use this feature, add the relevant feature name to `preview_features_enabled` field in the [provider configuration](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs#schema). Please always refer to the [Getting Help](https://github.com/snowflakedb/terraform-provider-snowflake?tab=readme-ov-file#getting-help) section in our Github repo to best determine how to get help for your questions.
 
+<!-- TODO(SNOW-2129584): address this limitation -->
+!> **Caution** Only asynchronous job services are supported. This resource uses `ASYNC=TRUE` during creation. In this case, the command returns immediately while the job is running. Creating a job service automatically executes the job (read more in [EXECUTE JOB SERVICE docs](https://docs.snowflake.com/en/sql-reference/sql/execute-job-service)).
+
+-> **Note** For asynchronous jobs, Snowflake does not perform automatic cleanup after completion. You must either remove the resource or execute the `DROP SERVICE` command to remove the job. If you want to execute the job again, use the [replace flag](https://developer.hashicorp.com/terraform/cli/commands/apply#replace-resource).
+
 -> **Note** Managing services via specification templates is not yet supported. This will be addressed in the next versions.
 
--> **Note** Managing service state is limited. It is handled by `auto_suspend_secs`, and `auto_resume` fields. The provider does not support managing the state of services in Snowflake with `ALTER ... SUSPEND` and `ALTER ... RESUME`. See [Suspending a service documentation](https://docs.snowflake.com/en/developer-guide/snowpark-container-services/working-with-services#suspending-a-service) for more details.
+# snowflake_job_service (Resource)
 
-# snowflake_service (Resource)
-
-Resource used to manage services. For more information, check [services documentation](https://docs.snowflake.com/en/sql-reference/sql/create-service). A long-running service is like a web service that does not end automatically. After you create a service, Snowflake manages the running service. For example, if a service container stops, for whatever reason, Snowflake restarts that container so the service runs uninterrupted. See [Working with services](https://docs.snowflake.com/en/developer-guide/snowpark-container-services/working-with-services) developer guide for more details.
+Resource used to manage job services. For more information, check [services documentation](https://docs.snowflake.com/en/sql-reference/sql/execute-job-service). Executes a Snowpark Container Services service as a job. A service, created using `CREATE SERVICE`, is long-running and you must explicitly stop it when it is no longer needed. On the other hand, a job, created using EXECUTE JOB SERVICE (with `ASYNC=TRUE` in this resource), returns immediately while the job is running. See [Working with services](https://docs.snowflake.com/en/developer-guide/snowpark-container-services/working-with-services) developer guide for more details.
 
 ## Example Usage
 
@@ -22,19 +25,19 @@ Resource used to manage services. For more information, check [services document
 
 ```terraform
 # basic resource - from specification file on stage
-resource "snowflake_service" "basic" {
+resource "snowflake_job_service" "basic" {
   database        = snowflake_database.test.name
   schema          = snowflake_schema.test.name
   name            = "SERVICE"
   in_compute_pool = snowflake_compute_pool.test.name
   from_specification {
-    stage = snowflake_stage.basic.fully_qualified_name
+    stage = snowflake_stage.test.fully_qualified_name
     file  = "spec.yaml"
   }
 }
 
 # basic resource - from specification content
-resource "snowflake_service" "basic" {
+resource "snowflake_job_service" "basic" {
   database        = snowflake_database.test.name
   schema          = snowflake_schema.test.name
   name            = "SERVICE"
@@ -50,28 +53,24 @@ spec:
 }
 
 # complete resource
-resource "snowflake_compute_pool" "complete" {
+resource "snowflake_job_service" "complete" {
   database        = snowflake_database.test.name
   schema          = snowflake_schema.test.name
   name            = "SERVICE"
   in_compute_pool = snowflake_compute_pool.test.name
   from_specification {
-    stage = snowflake_stage.complete.fully_qualified_name
+    stage = snowflake_stage.test.fully_qualified_name
     # or, with explicit stage value
     # stage = "\"DATABASE\".\"SCHEMA\".\"STAGE\""
     path = "path/to/spec"
     file = "spec.yaml"
   }
-  auto_suspend_secs = 1200
   external_access_integrations = [
     "INTEGRATION"
   ]
-  auto_resume         = true
-  min_instances       = 1
-  min_ready_instances = 1
-  max_instances       = 2
-  query_warehouse     = snowflake_warehouse.test.name
-  comment             = "A service."
+  async           = true
+  query_warehouse = "WAREHOUSE"
+  comment         = "A service."
 }
 ```
 
@@ -89,14 +88,9 @@ resource "snowflake_compute_pool" "complete" {
 
 ### Optional
 
-- `auto_resume` (String) (Default: fallback to Snowflake default - uses special value that cannot be set in the configuration manually (`default`)) Specifies whether to automatically resume a service. Available options are: "true" or "false". When the value is not set in the configuration the provider will put "default" there which means to use the Snowflake default for this value.
-- `auto_suspend_secs` (Number) (Default: fallback to Snowflake default - uses special value that cannot be set in the configuration manually (`-1`)) Specifies the number of seconds of inactivity (service is idle) after which Snowflake automatically suspends the service.
 - `comment` (String) Specifies a comment for the service.
 - `external_access_integrations` (Set of String) Specifies the names of the external access integrations that allow your service to access external sites.
 - `from_specification` (Block List, Max: 1) Specifies the service specification to use for the service. Note that external changes on this field and nested fields are not detected. (see [below for nested schema](#nestedblock--from_specification))
-- `max_instances` (Number) Specifies the maximum number of service instances to run.
-- `min_instances` (Number) Specifies the minimum number of service instances to run.
-- `min_ready_instances` (Number) Indicates the minimum service instances that must be ready for Snowflake to consider the service is ready to process requests.
 - `query_warehouse` (String) Warehouse to use if a service container connects to Snowflake to execute a query but does not explicitly specify a warehouse to use. Due to technical limitations (read more [here](../guides/identifiers_rework_design_decisions#known-limitations-and-identifier-recommendations)), avoid using the following characters: `|`, `.`, `"`.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -204,5 +198,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import snowflake_service.example '"<database_name>"."<schema_name>"."<service_name>"'
+terraform import snowflake_job_service.example '"<database_name>"."<schema_name>"."<job_service_name>"'
 ```
