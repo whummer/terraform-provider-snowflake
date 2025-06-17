@@ -555,7 +555,7 @@ func TestInt_Account_SelfAlter(t *testing.T) {
 					BaseLocationPrefix:                               sdk.String("STORAGE_BASE_URL/"),
 					BinaryInputFormat:                                sdk.Pointer(sdk.BinaryInputFormatBase64),
 					BinaryOutputFormat:                               sdk.Pointer(sdk.BinaryOutputFormatBase64),
-					Catalog:                                          sdk.String("SNOWFLAKE"),
+					Catalog:                                          sdk.String(helpers.TestDatabaseCatalog.Name()),
 					ClientEnableLogInfoStatementParameters:           sdk.Bool(true),
 					ClientEncryptionKeySize:                          sdk.Int(256),
 					ClientMemoryLimit:                                sdk.Int(1540),
@@ -674,7 +674,7 @@ func TestInt_Account_SelfAlter(t *testing.T) {
 		assertParameterValueSetOnAccount(t, parameters, string(sdk.AccountParameterBaseLocationPrefix), "STORAGE_BASE_URL/")
 		assertParameterValueSetOnAccount(t, parameters, string(sdk.AccountParameterBinaryInputFormat), string(sdk.BinaryInputFormatBase64))
 		assertParameterValueSetOnAccount(t, parameters, string(sdk.AccountParameterBinaryOutputFormat), string(sdk.BinaryOutputFormatBase64))
-		assertParameterValueSetOnAccount(t, parameters, string(sdk.AccountParameterCatalog), "SNOWFLAKE")
+		assertParameterValueSetOnAccount(t, parameters, string(sdk.AccountParameterCatalog), helpers.TestDatabaseCatalog.Name())
 		assertParameterValueSetOnAccount(t, parameters, string(sdk.AccountParameterClientEnableLogInfoStatementParameters), "true")
 		assertParameterValueSetOnAccount(t, parameters, string(sdk.AccountParameterClientEncryptionKeySize), "256")
 		assertParameterValueSetOnAccount(t, parameters, string(sdk.AccountParameterClientMemoryLimit), "1540")
@@ -937,7 +937,7 @@ func TestInt_Account_SelfAlter(t *testing.T) {
 		require.Nil(t, resourceMonitor.Level)
 		err := client.Accounts.Alter(ctx, &sdk.AlterAccountOptions{
 			Set: &sdk.AccountSet{
-				ResourceMonitor: resourceMonitor.ID(),
+				ResourceMonitor: sdk.Pointer(resourceMonitor.ID()),
 			},
 		})
 		require.NoError(t, err)
@@ -974,7 +974,7 @@ func TestInt_Account_SelfAlter(t *testing.T) {
 
 		err := client.Accounts.Alter(ctx, &sdk.AlterAccountOptions{
 			Set: &sdk.AccountSet{
-				PackagesPolicy: packagesPolicyId,
+				PackagesPolicy: &packagesPolicyId,
 			},
 		})
 		require.NoError(t, err)
@@ -988,7 +988,7 @@ func TestInt_Account_SelfAlter(t *testing.T) {
 
 		err = client.Accounts.Alter(ctx, &sdk.AlterAccountOptions{
 			Set: &sdk.AccountSet{
-				PasswordPolicy: passwordPolicy.ID(),
+				PasswordPolicy: sdk.Pointer(passwordPolicy.ID()),
 			},
 		})
 		require.NoError(t, err)
@@ -1002,7 +1002,7 @@ func TestInt_Account_SelfAlter(t *testing.T) {
 
 		err = client.Accounts.Alter(ctx, &sdk.AlterAccountOptions{
 			Set: &sdk.AccountSet{
-				SessionPolicy: sessionPolicy.ID(),
+				SessionPolicy: sdk.Pointer(sessionPolicy.ID()),
 			},
 		})
 		require.NoError(t, err)
@@ -1016,7 +1016,7 @@ func TestInt_Account_SelfAlter(t *testing.T) {
 
 		err = client.Accounts.Alter(ctx, &sdk.AlterAccountOptions{
 			Set: &sdk.AccountSet{
-				AuthenticationPolicy: authPolicy.ID(),
+				AuthenticationPolicy: sdk.Pointer(authPolicy.ID()),
 			},
 		})
 		require.NoError(t, err)
@@ -1073,7 +1073,7 @@ func TestInt_Account_SelfAlter(t *testing.T) {
 
 		err := client.Accounts.Alter(ctx, &sdk.AlterAccountOptions{
 			Set: &sdk.AccountSet{
-				PackagesPolicy: packagesPolicyId,
+				PackagesPolicy: &packagesPolicyId,
 			},
 		})
 		require.NoError(t, err)
@@ -1090,14 +1090,14 @@ func TestInt_Account_SelfAlter(t *testing.T) {
 
 		err = client.Accounts.Alter(ctx, &sdk.AlterAccountOptions{
 			Set: &sdk.AccountSet{
-				PackagesPolicy: newPackagesPolicyId,
+				PackagesPolicy: &newPackagesPolicyId,
 			},
 		})
 		require.Error(t, err)
 
 		err = client.Accounts.Alter(ctx, &sdk.AlterAccountOptions{
 			Set: &sdk.AccountSet{
-				PackagesPolicy: newPackagesPolicyId,
+				PackagesPolicy: &newPackagesPolicyId,
 				Force:          sdk.Bool(true),
 			},
 		})
