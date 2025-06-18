@@ -17,8 +17,8 @@ func DataTypeStateFunc(dataTypeRaw any) string {
 	return dataType.ToSql()
 }
 
-// handleDatatypeCreate should be used while handling top-level data type attribute creation.
-func handleDatatypeCreate(d *schema.ResourceData, key string, createFunc func(dataType datatypes.DataType) error) error {
+// HandleDatatypeCreate should be used while handling top-level data type attribute creation.
+func HandleDatatypeCreate(d *schema.ResourceData, key string, createFunc func(dataType datatypes.DataType) error) error {
 	log.Printf("[DEBUG] handling create for datatype field %s", key)
 	dataType, err := readDatatypeCommon(d, key)
 	if err != nil {
@@ -27,8 +27,8 @@ func handleDatatypeCreate(d *schema.ResourceData, key string, createFunc func(da
 	return createFunc(dataType)
 }
 
-// handleDatatypeUpdate should be used while handling top-level data type attribute update.
-func handleDatatypeUpdate(d *schema.ResourceData, key string, updateFunc func(dataType datatypes.DataType) error) error {
+// HandleDatatypeUpdate should be used while handling top-level data type attribute update.
+func HandleDatatypeUpdate(d *schema.ResourceData, key string, updateFunc func(dataType datatypes.DataType) error) error {
 	log.Printf("[DEBUG] handling update for datatype field %s", key)
 	if d.HasChange(key) {
 		dataType, err := readDatatypeCommon(d, key)
@@ -40,8 +40,8 @@ func handleDatatypeUpdate(d *schema.ResourceData, key string, updateFunc func(da
 	return nil
 }
 
-// handleDatatypeSet should be used while handling top-level data type attribute read.
-func handleDatatypeSet(d *schema.ResourceData, key string, externalDataType datatypes.DataType) error {
+// HandleDatatypeSet should be used while handling top-level data type attribute read.
+func HandleDatatypeSet(d *schema.ResourceData, key string, externalDataType datatypes.DataType) error {
 	log.Printf("[DEBUG] handling set for datatype field %s", key)
 	currentConfigDataType, err := readDatatypeCommon(d, key)
 	if err != nil {

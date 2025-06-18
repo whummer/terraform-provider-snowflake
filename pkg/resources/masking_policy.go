@@ -224,7 +224,7 @@ func CreateMaskingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 	}
 
 	var returns datatypes.DataType
-	if err := handleDatatypeCreate(d, "return_data_type", func(dataType datatypes.DataType) error {
+	if err := HandleDatatypeCreate(d, "return_data_type", func(dataType datatypes.DataType) error {
 		returns = dataType
 		return nil
 	}); err != nil {
@@ -292,7 +292,7 @@ func ReadMaskingPolicy(withExternalChangesMarking bool) schema.ReadContextFunc {
 			return diag.FromErr(err)
 		}
 
-		if err := handleDatatypeSet(d, "return_data_type", maskingPolicyDescription.ReturnType); err != nil {
+		if err := HandleDatatypeSet(d, "return_data_type", maskingPolicyDescription.ReturnType); err != nil {
 			return diag.FromErr(err)
 		}
 

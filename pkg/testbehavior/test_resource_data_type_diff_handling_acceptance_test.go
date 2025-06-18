@@ -1,13 +1,10 @@
-//go:build !account_level_tests
-
-package resources_test
+package testbehavior_test
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
-	acc "github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/acceptance"
 	tfjson "github.com/hashicorp/terraform-json"
 
 	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/acceptance/helpers/random"
@@ -23,8 +20,6 @@ import (
 
 // TODO [SNOW-2054208]: merge setups/test cases with TestAcc_TestResource_DataTypeDiffHandlingList during the package cleanup.
 func TestAcc_TestResource_DataTypeDiffHandling(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
-
 	envName := fmt.Sprintf("%s_%s", testenvs.TestResourceDataTypeDiffHandlingEnv, strings.ToUpper(random.AlphaN(10)))
 	resourceType := "snowflake_test_resource_data_type_diff_handling"
 	resourceName := "test"
@@ -199,7 +194,7 @@ resource "%[3]s" "%[4]s" {
 			}
 
 			resource.Test(t, resource.TestCase{
-				ProtoV6ProviderFactories: acc.TestAccProtoV6ProviderFactories,
+				// ProtoV6ProviderFactories: nil, // TODO: add new provider here
 				TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 					tfversion.RequireAbove(tfversion.Version1_5_0),
 				},
