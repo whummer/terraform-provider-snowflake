@@ -7,6 +7,7 @@ import (
 	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/acceptance/helpers/random"
 	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/acceptance/testvars"
 	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/sdk"
+	"github.com/stretchr/testify/require"
 )
 
 // FullTomlConfigForServiceUser is a temporary function used to test provider configuration
@@ -148,14 +149,35 @@ authenticator = 'SNOWFLAKE_JWT'
 func TomlConfigForLegacyServiceUser(t *testing.T, profile string, userId sdk.AccountObjectIdentifier, roleId sdk.AccountObjectIdentifier, warehouseId sdk.AccountObjectIdentifier, accountIdentifier sdk.AccountIdentifier, pass string) string {
 	t.Helper()
 
-	return fmt.Sprintf(`
-[%[1]s]
-user = '%[2]s'
-password = '%[7]s'
-role = '%[3]s'
-organization_name = '%[5]s'
-account_name = '%[6]s'
-warehouse = '%[4]s'
-authenticator = 'SNOWFLAKE'
-`, profile, userId.Name(), roleId.Name(), warehouseId.Name(), accountIdentifier.OrganizationName(), accountIdentifier.AccountName(), pass)
+	config := sdk.NewConfigDTO().
+		WithUser(userId.Name()).
+		WithPassword(pass).
+		WithRole(roleId.Name()).
+		WithOrganizationName(accountIdentifier.OrganizationName()).
+		WithAccountName(accountIdentifier.AccountName()).
+		WithWarehouse(warehouseId.Name()).
+		WithAuthenticator("SNOWFLAKE")
+	cfg := sdk.NewConfigFile().WithProfiles(map[string]sdk.ConfigDTO{profile: *config})
+	bytes, err := cfg.MarshalToml()
+	require.NoError(t, err)
+	return string(bytes)
+}
+
+// TomlConfigForServiceUserWithModifiers is a temporary function used to test provider configuration allowing to modify the toml config
+func TomlConfigForServiceUserWithModifiers(t *testing.T, profile string, serviceUser *TmpServiceUser, configDtoModifier func(cfg *sdk.ConfigDTO) *sdk.ConfigDTO) string {
+	t.Helper()
+
+	config := sdk.NewConfigDTO().
+		WithOrganizationName(serviceUser.AccountId.OrganizationName()).
+		WithAccountName(serviceUser.AccountId.AccountName()).
+		WithUser(serviceUser.UserId.Name()).
+		WithRole(serviceUser.RoleId.Name()).
+		WithWarehouse(serviceUser.WarehouseId.Name()).
+		WithPrivateKey(serviceUser.PrivateKey).
+		WithAuthenticator(string(sdk.AuthenticationTypeJwt))
+	config = configDtoModifier(config)
+	cfg := sdk.NewConfigFile().WithProfiles(map[string]sdk.ConfigDTO{profile: *config})
+	bytes, err := cfg.MarshalToml()
+	require.NoError(t, err)
+	return string(bytes)
 }

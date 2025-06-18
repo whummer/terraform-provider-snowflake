@@ -11,15 +11,18 @@ import (
 type feature string
 
 const (
-	CurrentAccountDatasource                      feature = "snowflake_current_account_datasource"
 	AccountAuthenticationPolicyAttachmentResource feature = "snowflake_account_authentication_policy_attachment_resource"
 	AccountPasswordPolicyAttachmentResource       feature = "snowflake_account_password_policy_attachment_resource"
 	AlertResource                                 feature = "snowflake_alert_resource"
 	AlertsDatasource                              feature = "snowflake_alerts_datasource"
 	ApiIntegrationResource                        feature = "snowflake_api_integration_resource"
 	AuthenticationPolicyResource                  feature = "snowflake_authentication_policy_resource"
+	ComputePoolResource                           feature = "snowflake_compute_pool_resource"
+	ComputePoolsDatasource                        feature = "snowflake_compute_pools_datasource"
 	CortexSearchServiceResource                   feature = "snowflake_cortex_search_service_resource"
 	CortexSearchServicesDatasource                feature = "snowflake_cortex_search_services_datasource"
+	CurrentAccountResource                        feature = "snowflake_current_account_resource"
+	CurrentAccountDatasource                      feature = "snowflake_current_account_datasource"
 	DatabaseDatasource                            feature = "snowflake_database_datasource"
 	DatabaseRoleDatasource                        feature = "snowflake_database_role_datasource"
 	DynamicTableResource                          feature = "snowflake_dynamic_table_resource"
@@ -39,6 +42,11 @@ const (
 	FunctionScalaResource                         feature = "snowflake_function_scala_resource"
 	FunctionSqlResource                           feature = "snowflake_function_sql_resource"
 	FunctionsDatasource                           feature = "snowflake_functions_datasource"
+	GitRepositoryResource                         feature = "snowflake_git_repository_resource"
+	GitRepositoriesDatasource                     feature = "snowflake_git_repositories_datasource"
+	ImageRepositoryResource                       feature = "snowflake_image_repository_resource"
+	ImageRepositoriesDatasource                   feature = "snowflake_image_repositories_datasource"
+	JobServiceResource                            feature = "snowflake_job_service_resource"
 	ManagedAccountResource                        feature = "snowflake_managed_account_resource"
 	MaterializedViewResource                      feature = "snowflake_materialized_view_resource"
 	MaterializedViewsDatasource                   feature = "snowflake_materialized_views_datasource"
@@ -57,6 +65,8 @@ const (
 	ProcedureSqlResource                          feature = "snowflake_procedure_sql_resource"
 	ProceduresDatasource                          feature = "snowflake_procedures_datasource"
 	CurrentRoleDatasource                         feature = "snowflake_current_role_datasource"
+	ServiceResource                               feature = "snowflake_service_resource"
+	ServicesDatasource                            feature = "snowflake_services_datasource"
 	SequenceResource                              feature = "snowflake_sequence_resource"
 	SequencesDatasource                           feature = "snowflake_sequences_datasource"
 	ShareResource                                 feature = "snowflake_share_resource"
@@ -80,15 +90,18 @@ const (
 )
 
 var allPreviewFeatures = []feature{
-	CurrentAccountDatasource,
 	AccountAuthenticationPolicyAttachmentResource,
 	AccountPasswordPolicyAttachmentResource,
 	AlertResource,
 	AlertsDatasource,
 	ApiIntegrationResource,
 	AuthenticationPolicyResource,
+	ComputePoolResource,
+	ComputePoolsDatasource,
 	CortexSearchServiceResource,
 	CortexSearchServicesDatasource,
+	CurrentAccountResource,
+	CurrentAccountDatasource,
 	DatabaseDatasource,
 	DatabaseRoleDatasource,
 	DynamicTableResource,
@@ -108,6 +121,11 @@ var allPreviewFeatures = []feature{
 	FunctionScalaResource,
 	FunctionSqlResource,
 	FunctionsDatasource,
+	GitRepositoryResource,
+	GitRepositoriesDatasource,
+	ImageRepositoryResource,
+	ImageRepositoriesDatasource,
+	JobServiceResource,
 	ManagedAccountResource,
 	MaterializedViewResource,
 	MaterializedViewsDatasource,
@@ -120,6 +138,8 @@ var allPreviewFeatures = []feature{
 	PipeResource,
 	PipesDatasource,
 	CurrentRoleDatasource,
+	ServiceResource,
+	ServicesDatasource,
 	SequenceResource,
 	SequencesDatasource,
 	ShareResource,

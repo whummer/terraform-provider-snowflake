@@ -27,6 +27,10 @@ var allDatasourcesSchemaDefs = []DatasourceSchemaDef{
 		schema: datasources.Accounts().Schema,
 	},
 	{
+		name:   "ComputePools",
+		schema: datasources.ComputePools().Schema,
+	},
+	{
 		name:   "Database",
 		schema: datasources.Database().Schema,
 	},
@@ -43,8 +47,16 @@ var allDatasourcesSchemaDefs = []DatasourceSchemaDef{
 		schema: datasources.Databases().Schema,
 	},
 	{
+		name:   "GitRepositories",
+		schema: datasources.GitRepositories().Schema,
+	},
+	{
 		name:   "Grants",
 		schema: datasources.Grants().Schema,
+	},
+	{
+		name:   "ImageRepositories",
+		schema: datasources.ImageRepositories().Schema,
 	},
 	{
 		name:   "MaskingPolicies",
@@ -69,6 +81,10 @@ var allDatasourcesSchemaDefs = []DatasourceSchemaDef{
 	{
 		name:   "SecurityIntegrations",
 		schema: datasources.SecurityIntegrations().Schema,
+	},
+	{
+		name:   "Services",
+		schema: datasources.Services().Schema,
 	},
 	{
 		name:   "Streamlits",
