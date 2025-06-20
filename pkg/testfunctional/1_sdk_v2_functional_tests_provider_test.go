@@ -29,7 +29,9 @@ func sdkV2FunctionalTestsProvider() *schema.Provider {
 
 func testResources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
-		"snowflake_test_resource_data_type_diff_handling": testfunctional.TestResourceDataTypeDiffHandling(),
+		"snowflake_test_resource_object_renaming":              testfunctional.TestResourceObjectRenamingListsAndSets(),
+		"snowflake_test_resource_data_type_diff_handling":      testfunctional.TestResourceDataTypeDiffHandling(),
+		"snowflake_test_resource_data_type_diff_handling_list": testfunctional.TestResourceDataTypeDiffHandlingList(),
 	}
 }
 

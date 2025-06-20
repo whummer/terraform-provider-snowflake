@@ -45,7 +45,7 @@ var apiAuthCommonSchema = map[string]*schema.Schema{
 	"oauth_client_auth_method": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		ValidateDiagFunc: sdkValidation(sdk.ToApiAuthenticationSecurityIntegrationOauthClientAuthMethodOption),
+		ValidateDiagFunc: SdkValidation(sdk.ToApiAuthenticationSecurityIntegrationOauthClientAuthMethodOption),
 		DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToApiAuthenticationSecurityIntegrationOauthClientAuthMethodOption), IgnoreChangeToCurrentSnowflakeListValueInDescribe("oauth_client_auth_method")),
 		Description:      fmt.Sprintf("Specifies that POST is used as the authentication method to the external service. If removed from the config, the resource is recreated. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AsStringList(sdk.AllApiAuthenticationSecurityIntegrationOauthClientAuthMethodOption))),
 	},
@@ -342,7 +342,7 @@ func handleApiAuthRead(d *schema.ResourceData,
 			return err
 		}
 	}
-	if err := setStateToValuesFromConfig(d, apiAuthCommonSchema, []string{
+	if err := SetStateToValuesFromConfig(d, apiAuthCommonSchema, []string{
 		"oauth_access_token_validity",
 		"oauth_refresh_token_validity",
 		"oauth_client_id",

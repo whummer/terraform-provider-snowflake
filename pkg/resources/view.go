@@ -107,7 +107,7 @@ var viewSchema = map[string]*schema.Schema{
 				"schedule_status": {
 					Type:             schema.TypeString,
 					Required:         true,
-					ValidateDiagFunc: sdkValidation(sdk.ToAllowedDataMetricScheduleStatusOption),
+					ValidateDiagFunc: SdkValidation(sdk.ToAllowedDataMetricScheduleStatusOption),
 					Description:      fmt.Sprintf("The status of the metrics association. Valid values are: %v. When status of a data metric function is changed, it is being reassigned with `DROP DATA METRIC FUNCTION` and `ADD DATA METRIC FUNCTION`, and then its status is changed by `MODIFY DATA METRIC FUNCTION` ", possibleValuesListed(sdk.AllAllowedDataMetricScheduleStatusOptions)),
 					DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToAllowedDataMetricScheduleStatusOption)),
 				},
@@ -637,7 +637,7 @@ func ReadView(withExternalChangesMarking bool) schema.ReadContextFunc {
 				return diag.FromErr(err)
 			}
 		}
-		if err = setStateToValuesFromConfig(d, viewSchema, []string{
+		if err = SetStateToValuesFromConfig(d, viewSchema, []string{
 			"change_tracking",
 			"is_recursive",
 			"is_secure",

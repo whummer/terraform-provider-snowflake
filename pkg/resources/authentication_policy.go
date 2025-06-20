@@ -42,7 +42,7 @@ var authenticationPolicySchema = map[string]*schema.Schema{
 		Type: schema.TypeSet,
 		Elem: &schema.Schema{
 			Type:             schema.TypeString,
-			ValidateDiagFunc: sdkValidation(sdk.ToAuthenticationMethodsOption),
+			ValidateDiagFunc: SdkValidation(sdk.ToAuthenticationMethodsOption),
 		},
 		Optional:    true,
 		Description: fmt.Sprintf("A list of authentication methods that are allowed during login. This parameter accepts one or more of the following values: %s", possibleValuesListed(sdk.AllAuthenticationMethods)),
@@ -51,7 +51,7 @@ var authenticationPolicySchema = map[string]*schema.Schema{
 		Type: schema.TypeSet,
 		Elem: &schema.Schema{
 			Type:             schema.TypeString,
-			ValidateDiagFunc: sdkValidation(sdk.ToMfaAuthenticationMethodsOption),
+			ValidateDiagFunc: SdkValidation(sdk.ToMfaAuthenticationMethodsOption),
 		},
 		Optional:    true,
 		Description: fmt.Sprintf("A list of authentication methods that enforce multi-factor authentication (MFA) during login. Authentication methods not listed in this parameter do not prompt for multi-factor authentication. Allowed values are %s.", possibleValuesListed(sdk.AllMfaAuthenticationMethods)),
@@ -60,14 +60,14 @@ var authenticationPolicySchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		Description:      "Determines whether a user must enroll in multi-factor authentication. Allowed values are REQUIRED and OPTIONAL. When REQUIRED is specified, Enforces users to enroll in MFA. If this value is used, then the CLIENT_TYPES parameter must include SNOWFLAKE_UI, because Snowsight is the only place users can enroll in multi-factor authentication (MFA).",
-		ValidateDiagFunc: sdkValidation(sdk.ToMfaEnrollmentOption),
+		ValidateDiagFunc: SdkValidation(sdk.ToMfaEnrollmentOption),
 		Default:          "OPTIONAL",
 	},
 	"client_types": {
 		Type: schema.TypeSet,
 		Elem: &schema.Schema{
 			Type:             schema.TypeString,
-			ValidateDiagFunc: sdkValidation(sdk.ToClientTypesOption),
+			ValidateDiagFunc: SdkValidation(sdk.ToClientTypesOption),
 		},
 		Optional:    true,
 		Description: fmt.Sprintf("A list of clients that can authenticate with Snowflake. If a client tries to connect, and the client is not one of the valid CLIENT_TYPES, then the login attempt fails. Allowed values are %s. The CLIENT_TYPES property of an authentication policy is a best effort method to block user logins based on specific clients. It should not be used as the sole control to establish a security boundary.", possibleValuesListed(sdk.AllClientTypes)),

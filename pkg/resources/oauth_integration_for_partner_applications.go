@@ -32,7 +32,7 @@ var oauthIntegrationForPartnerApplicationsSchema = map[string]*schema.Schema{
 		Required:         true,
 		ForceNew:         true,
 		Description:      fmt.Sprintf("Creates an OAuth interface between Snowflake and a partner application. Valid options are: %v.", possibleValuesListed(sdk.AllOauthSecurityIntegrationClients)),
-		ValidateDiagFunc: sdkValidation(sdk.ToOauthSecurityIntegrationClientOption),
+		ValidateDiagFunc: SdkValidation(sdk.ToOauthSecurityIntegrationClientOption),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToOauthSecurityIntegrationClientOption),
 	},
 	"oauth_redirect_uri": {
@@ -69,7 +69,7 @@ var oauthIntegrationForPartnerApplicationsSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		Description:      fmt.Sprintf("Specifies whether default secondary roles set in the user properties are activated by default in the session being opened. Valid options are: %v.", possibleValuesListed(sdk.AllOauthSecurityIntegrationUseSecondaryRoles)),
-		ValidateDiagFunc: sdkValidation(sdk.ToOauthSecurityIntegrationUseSecondaryRolesOption),
+		ValidateDiagFunc: SdkValidation(sdk.ToOauthSecurityIntegrationUseSecondaryRolesOption),
 		DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToOauthSecurityIntegrationUseSecondaryRolesOption), IgnoreChangeToCurrentSnowflakeListValueInDescribe("oauth_use_secondary_roles")),
 	},
 	"blocked_roles_list": {
@@ -406,7 +406,7 @@ func ReadContextOauthIntegrationForPartnerApplications(withExternalChangesMarkin
 			}
 		}
 
-		if err = setStateToValuesFromConfig(d, oauthIntegrationForPartnerApplicationsSchema, []string{
+		if err = SetStateToValuesFromConfig(d, oauthIntegrationForPartnerApplicationsSchema, []string{
 			"enabled",
 			"oauth_issue_refresh_tokens",
 			"oauth_refresh_token_validity",

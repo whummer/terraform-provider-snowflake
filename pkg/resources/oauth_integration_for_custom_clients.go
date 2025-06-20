@@ -32,7 +32,7 @@ var oauthIntegrationForCustomClientsSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		ValidateDiagFunc: sdkValidation(sdk.ToOauthSecurityIntegrationClientTypeOption),
+		ValidateDiagFunc: SdkValidation(sdk.ToOauthSecurityIntegrationClientTypeOption),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToOauthSecurityIntegrationClientTypeOption),
 		Description:      fmt.Sprintf("Specifies the type of client being registered. Snowflake supports both confidential and public clients. Valid options are: %v.", possibleValuesListed(sdk.AllOauthSecurityIntegrationClientTypes)),
 	},
@@ -69,7 +69,7 @@ var oauthIntegrationForCustomClientsSchema = map[string]*schema.Schema{
 	"oauth_use_secondary_roles": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		ValidateDiagFunc: sdkValidation(sdk.ToOauthSecurityIntegrationUseSecondaryRolesOption),
+		ValidateDiagFunc: SdkValidation(sdk.ToOauthSecurityIntegrationUseSecondaryRolesOption),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToOauthSecurityIntegrationUseSecondaryRolesOption),
 		Description:      fmt.Sprintf("Specifies whether default secondary roles set in the user properties are activated by default in the session being opened. Valid options are: %v.", possibleValuesListed(sdk.AllOauthSecurityIntegrationUseSecondaryRoles)),
 	},
@@ -523,7 +523,7 @@ func ReadContextOauthIntegrationForCustomClients(withExternalChangesMarking bool
 			}
 		}
 
-		if err = setStateToValuesFromConfig(d, oauthIntegrationForCustomClientsSchema, []string{
+		if err = SetStateToValuesFromConfig(d, oauthIntegrationForCustomClientsSchema, []string{
 			"enabled",
 			"oauth_allow_non_tls_redirect_uri",
 			"oauth_enforce_pkce",

@@ -9,7 +9,6 @@ import (
 	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/internal/oswrapper"
 	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/provider"
 	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/provider/previewfeatures"
-	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/resources"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
@@ -30,9 +29,6 @@ func init() {
 	log.Println("[DEBUG] Running init from old acceptance tests setup")
 
 	TestAccProvider = provider.Provider()
-	// TODO [SNOW-2054208]: improve during the package extraction
-	TestAccProvider.ResourcesMap["snowflake_object_renaming"] = resources.ObjectRenamingListsAndSets()
-	TestAccProvider.ResourcesMap["snowflake_test_resource_data_type_diff_handling_list"] = resources.TestResourceDataTypeDiffHandlingList()
 	TestAccProvider.ConfigureContextFunc = ConfigureProviderWithConfigCache
 
 	v5Server = TestAccProvider.GRPCProvider()

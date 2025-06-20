@@ -258,7 +258,7 @@ func functionBaseSchema() map[string]schema.Schema {
 			Type:             schema.TypeString,
 			Optional:         true,
 			ForceNew:         true,
-			ValidateDiagFunc: sdkValidation(sdk.ToNullInputBehavior),
+			ValidateDiagFunc: SdkValidation(sdk.ToNullInputBehavior),
 			DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToNullInputBehavior)), // TODO [SNOW-1348103]: IgnoreChangeToCurrentSnowflakeValueInShow("null_input_behavior") but not in show
 			Description:      fmt.Sprintf("Specifies the behavior of the function when called with null inputs. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AllAllowedNullInputBehaviors)),
 		},
@@ -266,7 +266,7 @@ func functionBaseSchema() map[string]schema.Schema {
 			Type:             schema.TypeString,
 			Optional:         true,
 			ForceNew:         true,
-			ValidateDiagFunc: sdkValidation(sdk.ToReturnResultsBehavior),
+			ValidateDiagFunc: SdkValidation(sdk.ToReturnResultsBehavior),
 			DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToReturnResultsBehavior)), // TODO [SNOW-1348103]: IgnoreChangeToCurrentSnowflakeValueInShow("return_results_behavior") but not in show
 			Description:      fmt.Sprintf("Specifies the behavior of the function when returning results. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AllAllowedReturnResultsBehaviors)),
 		},

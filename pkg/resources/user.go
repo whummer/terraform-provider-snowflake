@@ -122,7 +122,7 @@ var userSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		Default:          sdk.SecondaryRolesOptionDefault,
-		ValidateDiagFunc: sdkValidation(sdk.ToSecondaryRolesOption),
+		ValidateDiagFunc: SdkValidation(sdk.ToSecondaryRolesOption),
 		DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToSecondaryRolesOption), IgnoreChangeToCurrentSnowflakeValueInShowWithMapping("default_secondary_roles", func(x any) any {
 			return sdk.GetSecondaryRolesOptionFrom(x.(string))
 		})),
@@ -484,7 +484,7 @@ func GetReadUserFunc(userType sdk.UserType, withExternalChangesMarking bool) sch
 		if userType == sdk.UserTypePerson {
 			fieldsToSetStateToValueFromConfig = append(fieldsToSetStateToValueFromConfig, "must_change_password")
 		}
-		if err = setStateToValuesFromConfig(d, userSchema, fieldsToSetStateToValueFromConfig); err != nil {
+		if err = SetStateToValuesFromConfig(d, userSchema, fieldsToSetStateToValueFromConfig); err != nil {
 			return diag.FromErr(err)
 		}
 

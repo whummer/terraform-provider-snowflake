@@ -256,7 +256,7 @@ func ReadServiceCommonFunc(withExternalChangesMarking bool, extraOutputMappingsF
 			}
 		}
 
-		if err = setStateToValuesFromConfig(d, serviceSchema, append(extraSetStateToValuesFromConfigFields, "query_warehouse")); err != nil {
+		if err = SetStateToValuesFromConfig(d, serviceSchema, append(extraSetStateToValuesFromConfigFields, "query_warehouse")); err != nil {
 			return diag.FromErr(err)
 		}
 		errs := errors.Join(

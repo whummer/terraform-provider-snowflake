@@ -44,7 +44,7 @@ var externalVolumeSchema = map[string]*schema.Schema{
 				"storage_provider": {
 					Type:             schema.TypeString,
 					Required:         true,
-					ValidateDiagFunc: sdkValidation(sdk.ToStorageProvider),
+					ValidateDiagFunc: SdkValidation(sdk.ToStorageProvider),
 					DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToStorageProvider)),
 					Description:      fmt.Sprintf("Specifies the cloud storage provider that stores your data files. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AllStorageProviderValues)),
 				},
@@ -264,7 +264,7 @@ func ReadContextExternalVolume(withExternalChangesMarking bool) schema.ReadConte
 			}
 		}
 
-		if err = setStateToValuesFromConfig(d, externalVolumeSchema, []string{
+		if err = SetStateToValuesFromConfig(d, externalVolumeSchema, []string{
 			"allow_writes",
 		}); err != nil {
 			return diag.FromErr(err)

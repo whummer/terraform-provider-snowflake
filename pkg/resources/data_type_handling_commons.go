@@ -82,8 +82,8 @@ func readNestedDatatypeCommon(v map[string]any, key string) (datatypes.DataType,
 	}
 }
 
-// handleNestedDataTypeCreate should be used while handling nested data type attribute creation.
-func handleNestedDataTypeCreate[T any](d *schema.ResourceData, collectionKey string, dataTypeKey string, createItemFunc func(v map[string]any, dataType datatypes.DataType) (T, error)) ([]T, error) {
+// HandleNestedDataTypeCreate should be used while handling nested data type attribute creation.
+func HandleNestedDataTypeCreate[T any](d *schema.ResourceData, collectionKey string, dataTypeKey string, createItemFunc func(v map[string]any, dataType datatypes.DataType) (T, error)) ([]T, error) {
 	items := make([]T, 0)
 	arguments := d.Get(collectionKey).([]any)
 	for _, arg := range arguments {
@@ -103,8 +103,8 @@ func handleNestedDataTypeCreate[T any](d *schema.ResourceData, collectionKey str
 	return items, nil
 }
 
-// handleNestedDataTypeSet should be used while handling nested data type attribute read.
-func handleNestedDataTypeSet[T any](d *schema.ResourceData, collectionKey string, dataTypeKey string, externalCollection []T, extractDataType func(T) datatypes.DataType, setOtherFields func(T, map[string]any)) error {
+// HandleNestedDataTypeSet should be used while handling nested data type attribute read.
+func HandleNestedDataTypeSet[T any](d *schema.ResourceData, collectionKey string, dataTypeKey string, externalCollection []T, extractDataType func(T) datatypes.DataType, setOtherFields func(T, map[string]any)) error {
 	currentConfigDatatypes := d.Get(collectionKey).([]any)
 	nestedDatatypesSchema := make([]map[string]any, 0)
 

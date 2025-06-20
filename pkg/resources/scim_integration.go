@@ -38,7 +38,7 @@ var scimIntegrationSchema = map[string]*schema.Schema{
 		Required:         true,
 		ForceNew:         true,
 		Description:      fmt.Sprintf("Specifies the client type for the scim integration. Valid options are: %v.", possibleValuesListed(sdk.AllScimSecurityIntegrationScimClients)),
-		ValidateDiagFunc: sdkValidation(sdk.ToScimSecurityIntegrationScimClientOption),
+		ValidateDiagFunc: SdkValidation(sdk.ToScimSecurityIntegrationScimClientOption),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToScimSecurityIntegrationScimClientOption),
 	},
 	"run_as_role": {
@@ -47,7 +47,7 @@ var scimIntegrationSchema = map[string]*schema.Schema{
 		ForceNew: true,
 		Description: fmt.Sprintf("Specify the SCIM role in Snowflake that owns any users and roles that are imported from the identity provider into Snowflake using SCIM."+
 			" Provider assumes that the specified role is already provided. Valid options are: %v.", possibleValuesListed(sdk.AllScimSecurityIntegrationRunAsRoles)),
-		ValidateDiagFunc: sdkValidation(sdk.ToScimSecurityIntegrationRunAsRoleOption),
+		ValidateDiagFunc: SdkValidation(sdk.ToScimSecurityIntegrationRunAsRoleOption),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToScimSecurityIntegrationRunAsRoleOption),
 	},
 	"network_policy": {
@@ -335,7 +335,7 @@ func ReadContextSCIMIntegration(withExternalChangesMarking bool) schema.ReadCont
 			}
 		}
 
-		if err = setStateToValuesFromConfig(d, scimIntegrationSchema, []string{
+		if err = SetStateToValuesFromConfig(d, scimIntegrationSchema, []string{
 			"network_policy",
 			"sync_password",
 		}); err != nil {

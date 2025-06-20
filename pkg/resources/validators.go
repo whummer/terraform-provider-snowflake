@@ -78,11 +78,11 @@ func IntInSlice(valid []int) schema.SchemaValidateDiagFunc {
 	}
 }
 
-func sdkValidation[T any](normalize func(string) (T, error)) schema.SchemaValidateDiagFunc {
+func SdkValidation[T any](normalize func(string) (T, error)) schema.SchemaValidateDiagFunc {
 	return validators.NormalizeValidation(normalize)
 }
 
-var IsDataTypeValid = sdkValidation(datatypes.ParseDataType)
+var IsDataTypeValid = SdkValidation(datatypes.ParseDataType)
 
 func isNotEqualTo(notExpectedValue string, errorMessage string) schema.SchemaValidateDiagFunc {
 	return func(value any, path cty.Path) diag.Diagnostics {

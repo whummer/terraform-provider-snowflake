@@ -89,14 +89,14 @@ func init() {
 			Name:         sdk.ObjectParameterLogLevel,
 			Type:         schema.TypeString,
 			Description:  fmt.Sprintf("Specifies the severity level of messages that should be ingested and made available in the active event table. Valid options are: %v. Messages at the specified level (and at more severe levels) are ingested. For more information, see [LOG_LEVEL](https://docs.snowflake.com/en/sql-reference/parameters.html#label-log-level).", sdk.AsStringList(sdk.AllLogLevels)),
-			ValidateDiag: sdkValidation(sdk.ToLogLevel),
+			ValidateDiag: SdkValidation(sdk.ToLogLevel),
 			DiffSuppress: NormalizeAndCompare(sdk.ToLogLevel),
 		},
 		{
 			Name:         sdk.ObjectParameterTraceLevel,
 			Type:         schema.TypeString,
 			Description:  fmt.Sprintf("Controls how trace events are ingested into the event table. Valid options are: %v. For information about levels, see [TRACE_LEVEL](https://docs.snowflake.com/en/sql-reference/parameters.html#label-trace-level).", possibleValuesListed(sdk.AsStringList(sdk.AllTraceLevels))),
-			ValidateDiag: sdkValidation(sdk.ToTraceLevel),
+			ValidateDiag: SdkValidation(sdk.ToTraceLevel),
 			DiffSuppress: NormalizeAndCompare(sdk.ToTraceLevel),
 		},
 		{
@@ -114,7 +114,7 @@ func init() {
 			Name:         sdk.ObjectParameterStorageSerializationPolicy,
 			Type:         schema.TypeString,
 			Description:  fmt.Sprintf("The storage serialization policy for Iceberg tables that use Snowflake as the catalog. Valid options are: %v. COMPATIBLE: Snowflake performs encoding and compression of data files that ensures interoperability with third-party compute engines. OPTIMIZED: Snowflake performs encoding and compression of data files that ensures the best table performance within Snowflake. For more information, see [STORAGE_SERIALIZATION_POLICY](https://docs.snowflake.com/en/sql-reference/parameters#storage-serialization-policy).", sdk.AsStringList(sdk.AllStorageSerializationPolicies)),
-			ValidateDiag: sdkValidation(sdk.ToStorageSerializationPolicy),
+			ValidateDiag: SdkValidation(sdk.ToStorageSerializationPolicy),
 			DiffSuppress: NormalizeAndCompare(sdk.ToStorageSerializationPolicy),
 		},
 		{
@@ -133,7 +133,7 @@ func init() {
 			Name:         sdk.ObjectParameterUserTaskManagedInitialWarehouseSize,
 			Type:         schema.TypeString,
 			Description:  "The initial size of warehouse to use for managed warehouses in the absence of history. For more information, see [USER_TASK_MANAGED_INITIAL_WAREHOUSE_SIZE](https://docs.snowflake.com/en/sql-reference/parameters#user-task-managed-initial-warehouse-size).",
-			ValidateDiag: sdkValidation(sdk.ToWarehouseSize),
+			ValidateDiag: SdkValidation(sdk.ToWarehouseSize),
 			DiffSuppress: NormalizeAndCompare(sdk.ToWarehouseSize),
 		},
 		{
