@@ -157,7 +157,7 @@ func ReadContextApiAuthenticationIntegrationWithClientCredentials(withExternalCh
 		}); err != nil {
 			return diag.FromErr(err)
 		}
-		if err := SetStateToValuesFromConfig(d, apiAuthClientCredentialsSchema, []string{
+		if err := setStateToValuesFromConfig(d, apiAuthClientCredentialsSchema, []string{
 			"oauth_allowed_scopes",
 		}); err != nil {
 			return diag.FromErr(err)

@@ -50,7 +50,7 @@ var computePoolSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ForceNew:         true,
-		ValidateDiagFunc: SdkValidation(sdk.ToComputePoolInstanceFamily),
+		ValidateDiagFunc: sdkValidation(sdk.ToComputePoolInstanceFamily),
 		DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToComputePoolInstanceFamily)),
 		Description:      fmt.Sprintf("Identifies the type of machine you want to provision for the nodes in the compute pool. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AllComputePoolInstanceFamilies)),
 	},
@@ -235,7 +235,7 @@ func ReadComputePoolFunc(withExternalChangesMarking bool) schema.ReadContextFunc
 			}
 		}
 
-		if err = SetStateToValuesFromConfig(d, computePoolSchema, []string{
+		if err = setStateToValuesFromConfig(d, computePoolSchema, []string{
 			"for_application",
 			"auto_resume",
 			"auto_suspend_secs",

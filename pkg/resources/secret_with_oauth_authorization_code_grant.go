@@ -160,7 +160,7 @@ func ReadContextSecretWithAuthorizationCodeGrant(withExternalChangesMarking bool
 
 		return diag.FromErr(errors.Join(
 			handleSecretRead(d, id, secret, secretDescription),
-			SetStateToValuesFromConfig(d, secretAuthorizationCodeGrantSchema, []string{"oauth_refresh_token_expiry_time"}),
+			setStateToValuesFromConfig(d, secretAuthorizationCodeGrantSchema, []string{"oauth_refresh_token_expiry_time"}),
 			d.Set("api_authentication", secretDescription.IntegrationName),
 		))
 	}

@@ -94,11 +94,11 @@ type describeMapping struct {
 	normalizeFunc  func(any) any
 }
 
-// SetStateToValuesFromConfig currently handles only int, float, and string types.
+// setStateToValuesFromConfig currently handles only int, float, and string types.
 // It's needed for the case where:
 // - previous config was empty (therefore Snowflake defaults had been used)
 // - new config have the same values that are already in SF
-func SetStateToValuesFromConfig(d *schema.ResourceData, resourceSchema map[string]*schema.Schema, fields []string) error {
+func setStateToValuesFromConfig(d *schema.ResourceData, resourceSchema map[string]*schema.Schema, fields []string) error {
 	if !d.GetRawConfig().IsNull() {
 		vMap := d.GetRawConfig().AsValueMap()
 		for _, field := range fields {

@@ -27,8 +27,8 @@ func init() {
 		// session params
 		{Name: sdk.ProcedureParameterEnableConsoleOutput, Type: schema.TypeBool, Description: "Enable stdout/stderr fast path logging for anonyous stored procs. This is a public parameter (similar to LOG_LEVEL)."},
 		{Name: sdk.ProcedureParameterLogLevel, Type: schema.TypeString, Description: "LOG_LEVEL to use when filtering events"},
-		{Name: sdk.ProcedureParameterMetricLevel, Type: schema.TypeString, ValidateDiag: SdkValidation(sdk.ToMetricLevel), DiffSuppress: NormalizeAndCompare(sdk.ToMetricLevel), Description: "METRIC_LEVEL value to control whether to emit metrics to Event Table"},
-		{Name: sdk.ProcedureParameterTraceLevel, Type: schema.TypeString, ValidateDiag: SdkValidation(sdk.ToTraceLevel), DiffSuppress: NormalizeAndCompare(sdk.ToTraceLevel), Description: "Trace level value to use when generating/filtering trace events"},
+		{Name: sdk.ProcedureParameterMetricLevel, Type: schema.TypeString, ValidateDiag: sdkValidation(sdk.ToMetricLevel), DiffSuppress: NormalizeAndCompare(sdk.ToMetricLevel), Description: "METRIC_LEVEL value to control whether to emit metrics to Event Table"},
+		{Name: sdk.ProcedureParameterTraceLevel, Type: schema.TypeString, ValidateDiag: sdkValidation(sdk.ToTraceLevel), DiffSuppress: NormalizeAndCompare(sdk.ToTraceLevel), Description: "Trace level value to use when generating/filtering trace events"},
 	}
 
 	for _, field := range procedureParameterFields {

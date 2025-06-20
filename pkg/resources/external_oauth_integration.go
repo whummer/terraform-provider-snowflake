@@ -32,7 +32,7 @@ var externalOauthIntegrationSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      fmt.Sprintf("Specifies the OAuth 2.0 authorization server to be Okta, Microsoft Azure AD, Ping Identity PingFederate, or a Custom OAuth 2.0 authorization server. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AsStringList(sdk.AllExternalOauthSecurityIntegrationTypes))),
-		ValidateDiagFunc: SdkValidation(sdk.ToExternalOauthSecurityIntegrationTypeOption),
+		ValidateDiagFunc: sdkValidation(sdk.ToExternalOauthSecurityIntegrationTypeOption),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToExternalOauthSecurityIntegrationTypeOption),
 	},
 	"enabled": {
@@ -55,7 +55,7 @@ var externalOauthIntegrationSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		Description:      fmt.Sprintf("Indicates which Snowflake user record attribute should be used to map the access token to a Snowflake user record. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AsStringList(sdk.AllExternalOauthSecurityIntegrationSnowflakeUserMappingAttributes))),
-		ValidateDiagFunc: SdkValidation(sdk.ToExternalOauthSecurityIntegrationSnowflakeUserMappingAttributeOption),
+		ValidateDiagFunc: sdkValidation(sdk.ToExternalOauthSecurityIntegrationSnowflakeUserMappingAttributeOption),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToExternalOauthSecurityIntegrationSnowflakeUserMappingAttributeOption),
 	},
 	"external_oauth_jws_keys_url": {
@@ -109,7 +109,7 @@ var externalOauthIntegrationSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		Description:      fmt.Sprintf("Specifies whether the OAuth client or user can use a role that is not defined in the OAuth access token. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AsStringList(sdk.AsStringList(sdk.AllExternalOauthSecurityIntegrationAnyRoleModes)))),
-		ValidateDiagFunc: SdkValidation(sdk.ToExternalOauthSecurityIntegrationAnyRoleModeOption),
+		ValidateDiagFunc: sdkValidation(sdk.ToExternalOauthSecurityIntegrationAnyRoleModeOption),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToExternalOauthSecurityIntegrationAnyRoleModeOption),
 	},
 	"external_oauth_scope_delimiter": {
@@ -535,7 +535,7 @@ func ReadContextExternalOauthIntegration(withExternalChangesMarking bool) schema
 			}
 		}
 
-		if err = SetStateToValuesFromConfig(d, externalOauthIntegrationSchema, []string{
+		if err = setStateToValuesFromConfig(d, externalOauthIntegrationSchema, []string{
 			"external_oauth_jws_keys_url",
 			"external_oauth_rsa_public_key",
 			"external_oauth_rsa_public_key_2",

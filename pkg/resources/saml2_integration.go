@@ -47,7 +47,7 @@ var saml2IntegrationSchema = map[string]*schema.Schema{
 	"saml2_provider": {
 		Type:             schema.TypeString,
 		Required:         true,
-		ValidateDiagFunc: SdkValidation(sdk.ToSaml2SecurityIntegrationSaml2ProviderOption),
+		ValidateDiagFunc: sdkValidation(sdk.ToSaml2SecurityIntegrationSaml2ProviderOption),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToSaml2SecurityIntegrationSaml2ProviderOption),
 		Description:      fmt.Sprintf("The string describing the IdP. Valid options are: %v.", possibleValuesListed(sdk.AllSaml2SecurityIntegrationSaml2Providers)),
 	},
@@ -82,7 +82,7 @@ var saml2IntegrationSchema = map[string]*schema.Schema{
 	"saml2_requested_nameid_format": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		ValidateDiagFunc: SdkValidation(sdk.ToSaml2SecurityIntegrationSaml2RequestedNameidFormatOption),
+		ValidateDiagFunc: sdkValidation(sdk.ToSaml2SecurityIntegrationSaml2RequestedNameidFormatOption),
 		DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToSaml2SecurityIntegrationSaml2RequestedNameidFormatOption), IgnoreChangeToCurrentSnowflakeListValueInDescribe("saml2_requested_nameid_format")),
 		Description:      fmt.Sprintf("The SAML NameID format allows Snowflake to set an expectation of the identifying attribute of the user (i.e. SAML Subject) in the SAML assertion from the IdP to ensure a valid authentication to Snowflake. Valid options are: %v.", possibleValuesListed(sdk.AllSaml2SecurityIntegrationSaml2RequestedNameidFormats)),
 	},
@@ -620,7 +620,7 @@ func ReadContextSAML2Integration(withExternalChangesMarking bool) schema.ReadCon
 			}
 		}
 
-		if err = SetStateToValuesFromConfig(d, saml2IntegrationSchema, []string{
+		if err = setStateToValuesFromConfig(d, saml2IntegrationSchema, []string{
 			"enabled",
 			"saml2_enable_sp_initiated",
 			"saml2_sign_request",

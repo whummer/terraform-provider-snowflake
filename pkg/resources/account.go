@@ -58,7 +58,7 @@ var accountSchema = map[string]*schema.Schema{
 		Optional:         true,
 		Description:      externalChangesNotDetectedFieldDescription(fmt.Sprintf("Used for setting the type of the first user that is assigned the ACCOUNTADMIN role during account creation. Valid options are: %s", docs.PossibleValuesListed(sdk.AllUserTypes))),
 		DiffSuppressFunc: SuppressIfAny(IgnoreAfterCreation, NormalizeAndCompare(sdk.ToUserType)),
-		ValidateDiagFunc: SdkValidation(sdk.ToUserType),
+		ValidateDiagFunc: sdkValidation(sdk.ToUserType),
 	},
 	"first_name": {
 		Type:             schema.TypeString,
@@ -95,7 +95,7 @@ var accountSchema = map[string]*schema.Schema{
 		ForceNew:         true,
 		Description:      fmt.Sprintf("Snowflake Edition of the account. See more about Snowflake Editions in the [official documentation](https://docs.snowflake.com/en/user-guide/intro-editions). Valid options are: %s", docs.PossibleValuesListed(sdk.AllAccountEditions)),
 		DiffSuppressFunc: NormalizeAndCompare(sdk.ToAccountEdition),
-		ValidateDiagFunc: SdkValidation(sdk.ToAccountEdition),
+		ValidateDiagFunc: sdkValidation(sdk.ToAccountEdition),
 	},
 	"region_group": {
 		Type:        schema.TypeString,
@@ -367,7 +367,7 @@ func ReadAccount(withExternalChangesMarking bool) schema.ReadContextFunc {
 				return diag.FromErr(err)
 			}
 		} else {
-			if err = SetStateToValuesFromConfig(d, accountSchema, []string{
+			if err = setStateToValuesFromConfig(d, accountSchema, []string{
 				"name",
 				"admin_name",
 				"admin_password",

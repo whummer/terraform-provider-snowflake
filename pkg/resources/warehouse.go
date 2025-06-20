@@ -29,14 +29,14 @@ var warehouseSchema = map[string]*schema.Schema{
 	"warehouse_type": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		ValidateDiagFunc: SdkValidation(sdk.ToWarehouseType),
+		ValidateDiagFunc: sdkValidation(sdk.ToWarehouseType),
 		DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToWarehouseType), IgnoreChangeToCurrentSnowflakeValueInShow("type")),
 		Description:      fmt.Sprintf("Specifies warehouse type. Valid values are (case-insensitive): %s. Warehouse needs to be suspended to change its type. Provider will handle automatic suspension and resumption if needed.", possibleValuesListed(sdk.ValidWarehouseTypesString)),
 	},
 	"warehouse_size": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		ValidateDiagFunc: SdkValidation(sdk.ToWarehouseSize),
+		ValidateDiagFunc: sdkValidation(sdk.ToWarehouseSize),
 		DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToWarehouseSize), IgnoreChangeToCurrentSnowflakeValueInShow("size")),
 		Description:      fmt.Sprintf("Specifies the size of the virtual warehouse. Valid values are (case-insensitive): %s. Consult [warehouse documentation](https://docs.snowflake.com/en/sql-reference/sql/create-warehouse#optional-properties-objectproperties) for the details. Note: removing the size from config will result in the resource recreation.", possibleValuesListed(sdk.ValidWarehouseSizesString)),
 	},
@@ -57,7 +57,7 @@ var warehouseSchema = map[string]*schema.Schema{
 	"scaling_policy": {
 		Type:             schema.TypeString,
 		Optional:         true,
-		ValidateDiagFunc: SdkValidation(sdk.ToScalingPolicy),
+		ValidateDiagFunc: sdkValidation(sdk.ToScalingPolicy),
 		DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToWarehouseType), IgnoreChangeToCurrentSnowflakeValueInShow("scaling_policy")),
 		Description:      fmt.Sprintf("Specifies the policy for automatically starting and shutting down clusters in a multi-cluster warehouse running in Auto-scale mode. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.ValidWarehouseScalingPoliciesString)),
 	},
@@ -418,7 +418,7 @@ func GetReadWarehouseFunc(withExternalChangesMarking bool) schema.ReadContextFun
 			return diag.FromErr(err)
 		}
 
-		if err = SetStateToValuesFromConfig(d, warehouseSchema, []string{
+		if err = setStateToValuesFromConfig(d, warehouseSchema, []string{
 			"warehouse_type",
 			"warehouse_size",
 			"max_cluster_count",

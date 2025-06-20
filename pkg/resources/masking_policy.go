@@ -311,7 +311,7 @@ func ReadMaskingPolicy(withExternalChangesMarking bool) schema.ReadContextFunc {
 			}
 		}
 
-		if err = SetStateToValuesFromConfig(d, maskingPolicySchema, []string{
+		if err = setStateToValuesFromConfig(d, maskingPolicySchema, []string{
 			"exempt_other_policies",
 		}); err != nil {
 			return diag.FromErr(err)

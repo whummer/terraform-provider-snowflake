@@ -247,7 +247,7 @@ func procedureBaseSchema() map[string]schema.Schema {
 			Type:             schema.TypeString,
 			Optional:         true,
 			ForceNew:         true,
-			ValidateDiagFunc: SdkValidation(sdk.ToNullInputBehavior),
+			ValidateDiagFunc: sdkValidation(sdk.ToNullInputBehavior),
 			DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToNullInputBehavior)), // IgnoreChangeToCurrentSnowflakeValueInShow("null_input_behavior")),
 			Description:      fmt.Sprintf("Specifies the behavior of the procedure when called with null inputs. Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AllAllowedNullInputBehaviors)),
 		},
@@ -355,7 +355,7 @@ func procedureBaseSchema() map[string]schema.Schema {
 		"execute_as": {
 			Type:             schema.TypeString,
 			Optional:         true,
-			ValidateDiagFunc: SdkValidation(sdk.ToExecuteAs),
+			ValidateDiagFunc: sdkValidation(sdk.ToExecuteAs),
 			DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToExecuteAs), IgnoreChangeToCurrentSnowflakeValueInShow("execute_as")),
 			Description:      fmt.Sprintf("Specifies whether the stored procedure executes with the privileges of the owner (an “owner’s rights” stored procedure) or with the privileges of the caller (a “caller’s rights” stored procedure). If you execute the statement CREATE PROCEDURE … EXECUTE AS CALLER, then in the future the procedure will execute as a caller’s rights procedure. If you execute CREATE PROCEDURE … EXECUTE AS OWNER, then the procedure will execute as an owner’s rights procedure. For more information, see [Understanding caller’s rights and owner’s rights stored procedures](https://docs.snowflake.com/en/developer-guide/stored-procedure/stored-procedures-rights). Valid values are (case-insensitive): %s.", possibleValuesListed(sdk.AllAllowedExecuteAs)),
 		},

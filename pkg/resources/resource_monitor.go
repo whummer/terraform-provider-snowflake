@@ -45,7 +45,7 @@ var resourceMonitorSchema = map[string]*schema.Schema{
 		Type:             schema.TypeString,
 		Optional:         true,
 		RequiredWith:     []string{"start_timestamp"},
-		ValidateDiagFunc: SdkValidation(sdk.ToResourceMonitorFrequency),
+		ValidateDiagFunc: sdkValidation(sdk.ToResourceMonitorFrequency),
 		DiffSuppressFunc: SuppressIfAny(NormalizeAndCompare(sdk.ToResourceMonitorFrequency), IgnoreChangeToCurrentSnowflakeValueInShow("frequency")),
 		Description:      fmt.Sprintf("The frequency interval at which the credit usage resets to 0. Valid values are (case-insensitive): %s. If you set a `frequency` for a resource monitor, you must also set `start_timestamp`. If you specify `NEVER` for the frequency, the credit usage for the warehouse does not reset. After removing this field from the config, the previously set value will be preserved on the Snowflake side, not the default value. That's due to Snowflake limitation and the lack of unset functionality for this parameter.", possibleValuesListed(sdk.AllFrequencyValues)),
 	},
@@ -288,7 +288,7 @@ func ReadResourceMonitor(withExternalChangesMarking bool) schema.ReadContextFunc
 			}
 		}
 
-		if err = SetStateToValuesFromConfig(d, warehouseSchema, []string{
+		if err = setStateToValuesFromConfig(d, warehouseSchema, []string{
 			"credit_quota",
 			"frequency",
 			"start_timestamp",

@@ -206,7 +206,7 @@ func GetReadCortexSearchServiceFunc(withExternalChangesMarking bool) schema.Read
 			}
 		}
 
-		if err = SetStateToValuesFromConfig(d, cortexSearchServiceSchema, []string{
+		if err = setStateToValuesFromConfig(d, cortexSearchServiceSchema, []string{
 			"embedding_model",
 		}); err != nil {
 			return diag.FromErr(err)

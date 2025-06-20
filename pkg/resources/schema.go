@@ -279,7 +279,7 @@ func ReadContextSchema(withExternalChangesMarking bool) schema.ReadContextFunc {
 			}
 		}
 
-		if err = SetStateToValuesFromConfig(d, schemaSchema, []string{
+		if err = setStateToValuesFromConfig(d, schemaSchema, []string{
 			"is_transient",
 			"with_managed_access",
 		}); err != nil {
