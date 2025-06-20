@@ -19,9 +19,7 @@ import (
 )
 
 // TODO [SNOW-2054208]: merge setups/test cases with TestAcc_TestResource_DataTypeDiffHandling during the package cleanup.
-func TestAcc_TestResource_DataTypeDiffHandlingList(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
-
+func TestAcc_SdkV2Functional_TestResource_DataTypeDiffHandlingList(t *testing.T) {
 	envName := fmt.Sprintf("%s_%s", testenvs.TestResourceDataTypeDiffHandlingEnv, strings.ToUpper(random.AlphaN(10)))
 	resourceType := "snowflake_test_resource_data_type_diff_handling_list"
 	resourceName := "test"
@@ -164,7 +162,7 @@ resource "%[3]s" "%[4]s" {
 
 	for _, testCase := range testCases {
 		tc := testCase
-		t.Run(fmt.Sprintf("TestAcc_TestResource_DataTypeDiffHandlingList config value: %s, new config value: %s, external value: %s, expecting changes: %t", tc.ConfigValue, tc.NewConfigValue, tc.ExternalValue, tc.ExpectChanges), func(t *testing.T) {
+		t.Run(fmt.Sprintf("TestAcc_SdkV2Functional_TestResource_DataTypeDiffHandlingList config value: %s, new config value: %s, external value: %s, expecting changes: %t", tc.ConfigValue, tc.NewConfigValue, tc.ExternalValue, tc.ExpectChanges), func(t *testing.T) {
 			configValueDataType, err := datatypes.ParseDataType(tc.ConfigValue)
 			require.NoError(t, err)
 
