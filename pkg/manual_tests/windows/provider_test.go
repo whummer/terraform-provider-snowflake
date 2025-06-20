@@ -20,7 +20,7 @@ import (
 )
 
 func TestAcc_Provider_tomlConfigIsTooPermissive(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+	_ = testenvs.GetOrSkipTest(t, testenvs.EnableManual)
 	if !oswrapper.IsRunningOnWindows() {
 		t.Skip("checking file permissions on other platforms is currently done in the provider package")
 	}
