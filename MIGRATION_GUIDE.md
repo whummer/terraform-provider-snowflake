@@ -31,7 +31,7 @@ References: [#3750](https://github.com/snowflakedb/terraform-provider-snowflake/
 
 ### *(bugfix)* Fix external volume creation error handling
 
-Errors in [`snowflake_external_volume`](https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/external_volume) resource creation were not handled and propagated properly, resulting in provider errors similar to:
+Errors in [`snowflake_external_volume`](https://registry.terraform.io/providers/snowflakedb/snowflake/2.1.0/docs/resources/external_volume) resource creation were not handled and propagated properly, resulting in provider errors similar to:
 ```
 Warning: Failed to query external volume. Marking the resource as removed.
 │ 
