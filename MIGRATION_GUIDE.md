@@ -20,7 +20,7 @@ across different versions.
 
 ## v2.1.0 ➞ v2.2.0
 
-### *(bugfix) Fix grant_ownership resource for serverless tasks
+### *(bugfix)* Fix grant_ownership resource for serverless tasks
 
 Previously, it wasn't possible to use the `snowflake_grant_ownership` resource to grant ownership of serverless tasks.
 In this version, we fixed the issue, and now you can use the resource to grant ownership of serverless tasks.
@@ -29,7 +29,33 @@ No configuration changes are needed.
 
 References: [#3750](https://github.com/snowflakedb/terraform-provider-snowflake/issues/3750)
 
-### *(new feature) New fields in snowflake_cortex_search_service resource
+### *(bugfix)* Fix external volume creation error handling
+
+Errors in [`snowflake_external_volume`](https://registry.terraform.io/providers/snowflakedb/snowflake/2.1.0/docs/resources/external_volume) resource creation were not handled and propagated properly, resulting in provider errors similar to:
+```
+Warning: Failed to query external volume. Marking the resource as removed.
+│ 
+│   with snowflake_external_volume.s3_volume,
+│   on main.tf line 62, in resource "snowflake_external_volume" "s3_volume":
+│   62: resource "snowflake_external_volume" "s3_volume" {
+│ 
+│ External Volume: "MY_S3_EXTERNAL_VOLUME", Err: object does not exist
+╵
+╷
+│ Error: Provider produced inconsistent result after apply
+│ 
+│ When applying changes to snowflake_external_volume.s3_volume, provider
+│ "provider[\"registry.terraform.io/snowflakedb/snowflake\"]" produced an unexpected new value: Root object
+│ was present, but now absent.
+│ 
+│ This is a bug in the provider, which should be reported in the provider's own issue tracker.
+```
+
+Starting with this version, creation errors in `snowflake_external_volume` will be handled and propagated properly to the user.
+
+No configuration changes are needed.
+
+### *(new feature)* New fields in snowflake_cortex_search_service resource
 
 We added a new `embedding_model` field to the `snowflake_cortex_search_service`. This field specifies the embedding model to use in the Cortex Search Service.
 We updated the examples of using the resource with this field.
