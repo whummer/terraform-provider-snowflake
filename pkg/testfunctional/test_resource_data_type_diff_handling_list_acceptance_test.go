@@ -33,12 +33,14 @@ func TestAcc_TestResource_DataTypeDiffHandlingList(t *testing.T) {
 	testConfig := func(configValue string) string {
 		return fmt.Sprintf(`
 resource "%[3]s" "%[4]s" {
+	provider = "%[7]s"
+
 	env_name = "%[2]s"
 	%[5]s {
 		%[6]s = "%[1]s"
 	}
 }
-`, configValue, envName, resourceType, resourceName, listPropertyName, propertyName)
+`, configValue, envName, resourceType, resourceName, listPropertyName, propertyName, SdkV2FunctionalTestsProviderName)
 	}
 
 	type DataTypeDiffHandlingTestCase struct {

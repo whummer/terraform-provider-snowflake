@@ -504,10 +504,12 @@ func objectRenamingConfigList(listItems []map[string]any) string {
 	return fmt.Sprintf(`
 
 	resource "snowflake_test_resource_object_renaming" "test" {
-		%s
+		provider = "%[2]s"
+
+		%[1]s
 	}
 
-`, generatedListItems)
+`, generatedListItems, SdkV2FunctionalTestsProviderName)
 }
 
 type objectRenamingPlanCheck func(ctx context.Context, req plancheck.CheckPlanRequest, resp *plancheck.CheckPlanResponse)
@@ -1201,7 +1203,9 @@ manually_ordered_list {
 
 	return fmt.Sprintf(`
 resource "snowflake_test_resource_object_renaming" "test" {
-	%s
+	provider = "%[2]s"
+
+	%[1]s
 }
-`, generatedListItems)
+`, generatedListItems, SdkV2FunctionalTestsProviderName)
 }
