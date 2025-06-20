@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"context"
-	"github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/testbehavior"
 	"log"
 
 	internalprovider "github.com/Snowflake-Labs/terraform-provider-snowflake/pkg/internal/provider"
@@ -33,7 +32,6 @@ func init() {
 	TestAccProvider = provider.Provider()
 	// TODO [SNOW-2054208]: improve during the package extraction
 	TestAccProvider.ResourcesMap["snowflake_object_renaming"] = resources.ObjectRenamingListsAndSets()
-	TestAccProvider.ResourcesMap["snowflake_test_resource_data_type_diff_handling"] = testbehavior.TestResourceDataTypeDiffHandling() // TODO: move it to testbehavior
 	TestAccProvider.ResourcesMap["snowflake_test_resource_data_type_diff_handling_list"] = resources.TestResourceDataTypeDiffHandlingList()
 	TestAccProvider.ConfigureContextFunc = ConfigureProviderWithConfigCache
 

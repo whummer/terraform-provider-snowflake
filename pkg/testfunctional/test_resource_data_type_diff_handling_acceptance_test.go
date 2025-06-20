@@ -1,4 +1,4 @@
-package testbehavior_test
+package testfunctional_test
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ import (
 )
 
 // TODO [SNOW-2054208]: merge setups/test cases with TestAcc_TestResource_DataTypeDiffHandlingList during the package cleanup.
-func TestAcc_TestResource_DataTypeDiffHandling(t *testing.T) {
+func TestAcc_SdkV2Functional_TestResource_DataTypeDiffHandling(t *testing.T) {
 	envName := fmt.Sprintf("%s_%s", testenvs.TestResourceDataTypeDiffHandlingEnv, strings.ToUpper(random.AlphaN(10)))
 	resourceType := "snowflake_test_resource_data_type_diff_handling"
 	resourceName := "test"
@@ -29,10 +29,12 @@ func TestAcc_TestResource_DataTypeDiffHandling(t *testing.T) {
 	testConfig := func(configValue string) string {
 		return fmt.Sprintf(`
 resource "%[3]s" "%[4]s" {
-	env_name = "%[2]s"
-	%[5]s = "%[1]s"
+	provider = "%[6]s"
+	
+    env_name = "%[2]s"
+	%[5]s    = "%[1]s"
 }
-`, configValue, envName, resourceType, resourceName, propertyName)
+`, configValue, envName, resourceType, resourceName, propertyName, SdkV2FunctionalTestsProviderName)
 	}
 
 	type DataTypeDiffHandlingTestCase struct {
@@ -156,7 +158,7 @@ resource "%[3]s" "%[4]s" {
 
 	for _, testCase := range testCases {
 		tc := testCase
-		t.Run(fmt.Sprintf("TestAcc_TestResource_DataTypeDiffHandling config value: %s, new config value: %s, external value: %s, expecting changes: %t", tc.ConfigValue, tc.NewConfigValue, tc.ExternalValue, tc.ExpectChanges), func(t *testing.T) {
+		t.Run(fmt.Sprintf("TestAcc_SdkV2Functional_TestResource_DataTypeDiffHandling config value: %s, new config value: %s, external value: %s, expecting changes: %t", tc.ConfigValue, tc.NewConfigValue, tc.ExternalValue, tc.ExpectChanges), func(t *testing.T) {
 			configValueDataType, err := datatypes.ParseDataType(tc.ConfigValue)
 			require.NoError(t, err)
 
@@ -194,7 +196,7 @@ resource "%[3]s" "%[4]s" {
 			}
 
 			resource.Test(t, resource.TestCase{
-				// ProtoV6ProviderFactories: nil, // TODO: add new provider here
+				ProtoV6ProviderFactories: providerForSdkV2FunctionalTestsFactories,
 				TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 					tfversion.RequireAbove(tfversion.Version1_5_0),
 				},

@@ -1,4 +1,4 @@
-package testbehavior
+package testfunctional
 
 import (
 	"context"
