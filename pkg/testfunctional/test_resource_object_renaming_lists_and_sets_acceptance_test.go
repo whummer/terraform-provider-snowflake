@@ -19,8 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
-func TestAcc_BasicListFlow(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+func TestAcc_SdkV2Functional_BasicListFlow(t *testing.T) {
 	_ = testenvs.GetOrSkipTest(t, testenvs.EnableObjectRenamingTest)
 
 	resource.Test(t, resource.TestCase{
@@ -381,8 +380,7 @@ func TestAcc_BasicListFlow(t *testing.T) {
 }
 
 // This test researches the possibility of performing update instead of remove + add item
-func TestAcc_ListNameUpdate(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+func TestAcc_SdkV2Functional_ListNameUpdate(t *testing.T) {
 	_ = testenvs.GetOrSkipTest(t, testenvs.EnableObjectRenamingTest)
 
 	resource.Test(t, resource.TestCase{
@@ -433,8 +431,7 @@ func TestAcc_ListNameUpdate(t *testing.T) {
 	})
 }
 
-func TestAcc_ListsWithDuplicatedItems(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+func TestAcc_SdkV2Functional_ListsWithDuplicatedItems(t *testing.T) {
 	_ = testenvs.GetOrSkipTest(t, testenvs.EnableObjectRenamingTest)
 
 	// Fails, because the SuppressDiffFunc works on the hash of individual items.
@@ -529,8 +526,7 @@ func assertObjectRenamingDatabaseChangelogAndClearIt(changelog testfunctional.Ob
 	})
 }
 
-func TestAcc_SupportedActions(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+func TestAcc_SdkV2Functional_SupportedActions(t *testing.T) {
 	_ = testenvs.GetOrSkipTest(t, testenvs.EnableObjectRenamingTest)
 
 	resource.Test(t, resource.TestCase{
@@ -788,8 +784,7 @@ func TestAcc_SupportedActions(t *testing.T) {
 	})
 }
 
-func TestAcc_UnsupportedActions_AddItemsNotAtTheEnd(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+func TestAcc_SdkV2Functional_UnsupportedActions_AddItemsNotAtTheEnd(t *testing.T) {
 	_ = testenvs.GetOrSkipTest(t, testenvs.EnableObjectRenamingTest)
 
 	resource.Test(t, resource.TestCase{
@@ -864,8 +859,7 @@ func TestAcc_UnsupportedActions_AddItemsNotAtTheEnd(t *testing.T) {
 	})
 }
 
-func TestAcc_UnsupportedActions_ChangeItemTypeToIncompatibleOne(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+func TestAcc_SdkV2Functional_UnsupportedActions_ChangeItemTypeToIncompatibleOne(t *testing.T) {
 	_ = testenvs.GetOrSkipTest(t, testenvs.EnableObjectRenamingTest)
 
 	resource.Test(t, resource.TestCase{
@@ -936,8 +930,7 @@ func TestAcc_UnsupportedActions_ChangeItemTypeToIncompatibleOne(t *testing.T) {
 	})
 }
 
-func TestAcc_UnsupportedActions_ExternalChange_AddNewItem(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+func TestAcc_SdkV2Functional_UnsupportedActions_ExternalChange_AddNewItem(t *testing.T) {
 	_ = testenvs.GetOrSkipTest(t, testenvs.EnableObjectRenamingTest)
 
 	resource.Test(t, resource.TestCase{
@@ -1018,8 +1011,7 @@ func TestAcc_UnsupportedActions_ExternalChange_AddNewItem(t *testing.T) {
 	})
 }
 
-func TestAcc_UnsupportedActions_ExternalChange_RemoveItem(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+func TestAcc_SdkV2Functional_UnsupportedActions_ExternalChange_RemoveItem(t *testing.T) {
 	_ = testenvs.GetOrSkipTest(t, testenvs.EnableObjectRenamingTest)
 
 	resource.Test(t, resource.TestCase{
@@ -1115,8 +1107,7 @@ func TestAcc_UnsupportedActions_ExternalChange_RemoveItem(t *testing.T) {
 	})
 }
 
-func TestAcc_UnsupportedActions_ChangingTheOrderOfItem(t *testing.T) {
-	_ = testenvs.GetOrSkipTest(t, testenvs.EnableAcceptance)
+func TestAcc_SdkV2Functional_UnsupportedActions_ChangingTheOrderOfItem(t *testing.T) {
 	_ = testenvs.GetOrSkipTest(t, testenvs.EnableObjectRenamingTest)
 
 	resource.Test(t, resource.TestCase{
