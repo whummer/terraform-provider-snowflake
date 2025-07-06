@@ -1,0 +1,28 @@
+# Integration tests run against LocalStack for Snowflake
+
+name: Integration Tests
+
+on:
+  repository_dispatch:
+  pull_request:
+
+jobs:
+  integration-tests:
+    environment: test
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up LocalStack
+        run: |
+          docker pull localstack/snowflake &
+          pip install localstack
+          IMAGE_NAME=localstack/snowflake localstack start -d
+          localstack wait
+
+      - name: Prepare environment
+        run: |
+          make init-local
+
+      - name: Run tests
+        run: |
+          make test-local
