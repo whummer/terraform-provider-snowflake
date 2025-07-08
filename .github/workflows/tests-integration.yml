@@ -18,6 +18,7 @@ jobs:
       - name: Set up LocalStack
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+          DOCKER_FLAGS: "-e SF_LOG=trace -e DEBUG=1"
         run: |
           pip install localstack &
           docker pull localstack/snowflake
@@ -26,6 +27,9 @@ jobs:
 
       - name: Prepare environment
         run: |
+          # fetch Go libraries in the background ...
+          go build ./pkg/testacc &
+
           pip install snowflake-cli
 
           # create connection configs
@@ -45,12 +49,13 @@ jobs:
           user = "test"
           password = "test"
           EOT
+          chmod 0600 ~/.snowflake/config
 
           # note: currently the `snow` CLI and the Golang SF SDK require different configs - TODO unify over time
           cat <<EOT >> ~/.snowflake/config.toml
           [connections.localstack]
           host = "snowflake.localhost.localstack.cloud"
-          account = "test"
+          account = "test1"
           user = "test"
           password = "test"
 
@@ -60,10 +65,16 @@ jobs:
           user = "test"
           password = "test"
           EOT
-          chmod 0600 /home/runner/.snowflake/config.toml
+          chmod 0600 ~/.snowflake/config.toml
 
           make init-local
 
       - name: Run tests
         run: |
           make test-local
+
+      - name: Print LocalStack logs
+        if: always()
+        run: |
+          localstack logs
+          localstack stop

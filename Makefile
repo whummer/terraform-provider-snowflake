@@ -23,7 +23,7 @@ init-local: ## initialize the local dev environment, to run tests against LocalS
 	snow sql -c localstack2 -q 'CREATE ROLE OKTA_PROVISIONER; GRANT ROLE OKTA_PROVISIONER TO PUBLIC'
 
 test-local: ## run local integration tests against LocalStack for Snowflake
-	TF_LOG=trace TF_ACC=1 go test ./pkg/testacc/
+	TF_ACC=1 go test ./pkg/testacc/
 
 dev-setup: ## setup development dependencies
 # TODO(SNOW-2002208): Upgrade to the latest version of golangci-lint.
