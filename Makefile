@@ -12,6 +12,19 @@ UNIT_TESTS_EXCLUDE_PATTERN=$(shell echo $(UNIT_TESTS_EXCLUDE_PACKAGES) | sed 's/
 
 default: help
 
+init-local: ## initialize the local dev environment, to run tests against LocalStack for Snowflake
+	snow sql -c localstack -q 'CREATE ROLE GENERIC_SCIM_PROVISIONER; GRANT ROLE GENERIC_SCIM_PROVISIONER TO PUBLIC'
+	snow sql -c localstack2 -q 'CREATE ROLE GENERIC_SCIM_PROVISIONER; GRANT ROLE GENERIC_SCIM_PROVISIONER TO PUBLIC'
+
+	snow sql -c localstack -q 'CREATE ROLE AAD_PROVISIONER; GRANT ROLE AAD_PROVISIONER TO PUBLIC'
+	snow sql -c localstack2 -q 'CREATE ROLE AAD_PROVISIONER; GRANT ROLE AAD_PROVISIONER TO PUBLIC'
+
+	snow sql -c localstack -q 'CREATE ROLE OKTA_PROVISIONER; GRANT ROLE OKTA_PROVISIONER TO PUBLIC'
+	snow sql -c localstack2 -q 'CREATE ROLE OKTA_PROVISIONER; GRANT ROLE OKTA_PROVISIONER TO PUBLIC'
+
+test-local: ## run local integration tests against LocalStack for Snowflake
+	TF_ACC=1 go test ./pkg/testacc/
+
 dev-setup: ## setup development dependencies
 # TODO(SNOW-2002208): Upgrade to the latest version of golangci-lint.
 	@which ./bin/golangci-lint || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.64.8
