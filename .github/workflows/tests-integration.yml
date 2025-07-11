@@ -1,0 +1,80 @@
+# Integration tests run against LocalStack for Snowflake
+
+name: Integration Tests
+
+on:
+  repository_dispatch:
+  pull_request:
+
+jobs:
+  integration-tests:
+    environment: test
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up LocalStack
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+          DOCKER_FLAGS: "-e SF_LOG=trace -e DEBUG=1"
+        run: |
+          pip install localstack &
+          docker pull localstack/snowflake
+          IMAGE_NAME=localstack/snowflake localstack start -d
+          localstack wait
+
+      - name: Prepare environment
+        run: |
+          # fetch Go libraries in the background ...
+          go build ./pkg/testacc &
+
+          pip install snowflake-cli
+
+          # create connection configs
+          mkdir -p ~/.snowflake
+          cat <<EOT >> ~/.snowflake/config
+          [default]
+          host = "snowflake.localhost.localstack.cloud"
+          organization_name = "TEST"
+          account_name = "TEST1"
+          user = "test"
+          password = "test"
+
+          [secondary_test_account]
+          host = "snowflake.localhost.localstack.cloud"
+          organization_name = "TEST"
+          account_name = "TEST2"
+          user = "test"
+          password = "test"
+          EOT
+          chmod 0600 ~/.snowflake/config
+
+          # note: currently the `snow` CLI and the Golang SF SDK require different configs - TODO unify over time
+          cat <<EOT >> ~/.snowflake/config.toml
+          [connections.localstack]
+          host = "snowflake.localhost.localstack.cloud"
+          account = "test1"
+          user = "test"
+          password = "test"
+
+          [connections.localstack2]
+          host = "snowflake.localhost.localstack.cloud"
+          account = "test2"
+          user = "test"
+          password = "test"
+          EOT
+          chmod 0600 ~/.snowflake/config.toml
+
+          make init-local
+
+      - name: Run tests
+        run: |
+          make test-local
+
+      - name: Print LocalStack logs
+        if: always()
+        run: |
+          localstack logs
+          localstack stop
