@@ -9,7 +9,8 @@ import (
 // TODO [mux-PRs]: https://go.dev/blog/routing-enhancements
 type DynamicHandler[T any] struct {
 	currentValue    T
-	replaceWithFunc func(T, T) T
+	defaultValue    T
+	replaceWithFunc func(T, T, T) T
 }
 
 // TODO [mux-PRs]: Log nicer values (use interface)
@@ -27,7 +28,7 @@ func (h *DynamicHandler[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// Not handling the error on purpose - it's a test helper, there is no test context here, and we will know on the assertion level.
 		_ = json.NewDecoder(r.Body).Decode(&newValue)
 		logger.Printf("[DEBUG] Received post request. New value %v", newValue)
-		h.currentValue = h.replaceWithFunc(h.currentValue, newValue)
+		h.currentValue = h.replaceWithFunc(h.currentValue, h.defaultValue, newValue)
 	}
 }
 
@@ -37,19 +38,24 @@ func (h *DynamicHandler[T]) SetCurrentValue(valueProvider T) {
 
 func NewDynamicHandler[T any]() *DynamicHandler[T] {
 	return &DynamicHandler[T]{
-		replaceWithFunc: func(_ T, t2 T) T {
-			return t2
-		},
+		replaceWithFunc: AlwaysReplace[T],
 	}
 }
 
-func NewDynamicHandlerWithInitialValueAndReplaceWithFunc[T any](initialValue T, replaceWithFunc func(T, T) T) *DynamicHandler[T] {
+func NewDynamicHandlerWithInitialValueAndReplaceWithFunc[T any](initialValue T, replaceWithFunc func(T, T, T) T) *DynamicHandler[T] {
 	return &DynamicHandler[T]{
 		currentValue:    initialValue,
 		replaceWithFunc: replaceWithFunc,
 	}
 }
 
-func AlwaysReplace[T any](_ T, replaceWith T) T {
+func NewDynamicHandlerWithDefaultValueAndReplaceWithFunc[T any](defaultValue T, replaceWithFunc func(T, T, T) T) *DynamicHandler[T] {
+	return &DynamicHandler[T]{
+		defaultValue:    defaultValue,
+		replaceWithFunc: replaceWithFunc,
+	}
+}
+
+func AlwaysReplace[T any](_ T, _T, replaceWith T) T {
 	return replaceWith
 }
