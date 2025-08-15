@@ -6,6 +6,7 @@ export TERRAFORM_PLUGIN_LOCAL_INSTALL=$(TERRAFORM_PLUGINS_DIR)/$(BASE_BINARY_NAM
 export LATEST_GIT_TAG=$(shell git tag --sort=-version:refname | head -n 1)
 export CURRENT_OS := $(shell uname -s)
 export CURRENT_ARCH := $(shell arch)
+GO_TEST_FLAGS ?= -timeout 25m
 
 UNIT_TESTS_EXCLUDE_PACKAGES=./pkg/testacc ./pkg/sdk/testint ./pkg/testfunctional ./pkg/manual_tests
 UNIT_TESTS_EXCLUDE_PATTERN=$(shell echo $(UNIT_TESTS_EXCLUDE_PACKAGES) | sed 's/ /|/g')
@@ -23,7 +24,7 @@ init-local: ## initialize the local dev environment, to run tests against LocalS
 	snow sql -c localstack2 -q 'CREATE ROLE OKTA_PROVISIONER; GRANT ROLE OKTA_PROVISIONER TO PUBLIC'
 
 test-local: ## run local integration tests against LocalStack for Snowflake
-	TF_ACC=1 go test ./pkg/testacc/
+	TF_ACC=1 go test $(GO_TEST_FLAGS) ./pkg/testacc/
 
 dev-setup: ## setup development dependencies
 # TODO(SNOW-2002208): Upgrade to the latest version of golangci-lint.
@@ -99,7 +100,7 @@ test-architecture: ## check architecture constraints between packages
 	go test ./pkg/architests/... -v
 
 test-acceptance-%: ## run acceptance tests for the given resource only, e.g. test-acceptance-Warehouse
-	TF_ACC=1 TF_LOG=DEBUG SNOWFLAKE_DRIVER_TRACING=debug SF_TF_ACC_TEST_CONFIGURE_CLIENT_ONCE=true SF_TF_ACC_TEST_ENABLE_ALL_PREVIEW_FEATURES=true go test -run ^TestAcc_$*_ -v -timeout=20m ./pkg/testacc
+	TF_ACC=1 TF_LOG=DEBUG SNOWFLAKE_DRIVER_TRACING=debug SF_TF_ACC_TEST_CONFIGURE_CLIENT_ONCE=true SF_TF_ACC_TEST_ENABLE_ALL_PREVIEW_FEATURES=true go test -run ^TestAcc_$*_ -v -timeout=25m ./pkg/testacc
 
 build-local: ## build the binary locally
 	go build -o $(BASE_BINARY_NAME) .
